@@ -12,7 +12,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,12 +50,11 @@ public class Inventario extends javax.swing.JFrame {
             return false;
         }
     };
-    private String[] volumen = new String[3];
-    private String[] unidad = new String[3];
-    private String[] longitud = new String[3];
-    private String[] area = new String[3];
-    private String[] DI = new String[5];
+
+    private String[] DI = new String[8];
     private String Usuario = null;
+    private String[] DatosAntiguos = new String[8];
+    private String[] DatosNuevos = new String[8];
 
     /**
      * Creates new form Inventario
@@ -64,70 +62,35 @@ public class Inventario extends javax.swing.JFrame {
     public Inventario() {
 
         initComponents();
-        volumen[0] = "Litros";
-        volumen[1] = "cm3";
-        volumen[2] = "Galon";
-        unidad[0] = "Cajas";
-        unidad[1] = "pares";
-        unidad[2] = "docenas";
-        longitud[0] = "m";
-        longitud[1] = "cm";
-        longitud[2] = "pie";
-        area[0] = "cm2";
-        area[1] = "m2";
-        area[2] = "pie2";
+
         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation(dim.width / 4 - this.getSize().width / 4, dim.height / 10 - this.getSize().height / 10);
+        this.setLocationRelativeTo(null);
         this.setTitle("Inventario De La 'Empresa' - Sistema Inventario BTZ");
 
         this.setResizable(false);
-//pruebas
-
-        TipoE.addItem("Longitud");
-        TipoE.addItem("Volumen");
-        TipoE.addItem("Area");
-        TipoE.addItem("Unidades");
-        //this.setUndecorated(true);
         this.setSize(1290, 600);
 
-        //this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
-        //
-        // this.setSize(475, 500);
-        try {
+  
+        modeloBusqueda.addColumn("Código");
+        modeloBusqueda.addColumn("Nombre");
+        modeloBusqueda.addColumn("Marca");
+        modeloBusqueda.addColumn("Unidad");
+        modeloBusqueda.addColumn("Categoria");
+        modeloBusqueda.addColumn("Presentación");
+        modeloBusqueda.addColumn("Existencia");
+        modeloBusqueda.addColumn("Stock Minimo");
+        modeloBusqueda.addColumn("% Ganancia");
+        Inventario.setModel(modeloBusqueda);
 
-            modeloBusqueda.addColumn("Codigo");
-            modeloBusqueda.addColumn("Nombre");
-            modeloBusqueda.addColumn("Marca");
-            modeloBusqueda.addColumn("Unidad");
-            modeloBusqueda.addColumn("Existencia");
-            modeloBusqueda.addColumn("Stock Minimo");
-            Inventario.setModel(modeloBusqueda);
-
-            String datos[] = new String[6];
-            int contar = 0;
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Codigo,Nombre,Marca,Medida,Existencia,StockMinimo FROM Producto");
-            while (Ca.next()) {
-                datos[0] = Ca.getString(1);
-                datos[1] = Ca.getString(2);
-                datos[2] = Ca.getString(3);
-                datos[3] = Ca.getString(4);
-                datos[4] = Ca.getString(5);
-                datos[5] = Ca.getString(6);
-                modeloBusqueda.addRow(datos);
-                contar++;
-            }
-            Inventario.setModel(modeloBusqueda);
-            if (contar == 0) {
-                JOptionPane.showMessageDialog(null, "No hay Productos en la base de datos");
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Inventario.getColumn("Código").setPreferredWidth(45);
+        Inventario.getColumn("Marca").setPreferredWidth(45);
+        Inventario.getColumn("Nombre").setPreferredWidth(45);
+        Inventario.getColumn("Unidad").setPreferredWidth(45);
+        Inventario.getColumn("Existencia").setPreferredWidth(50);
         Inventario.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent Mouse_evt) {
-                //try{
+               
                 JTable table = (JTable) Mouse_evt.getSource();
                 Point point = Mouse_evt.getPoint();
                 int row = table.rowAtPoint(point);
@@ -136,26 +99,41 @@ public class Inventario extends javax.swing.JFrame {
                     String x = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 2));
                     String xr = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 1));
                     String brz = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 3));
-                    
-                    
-                    LotesMostrar ere = new LotesMostrar(x, xr, brz);
+
+                    Registro1 ere = new Registro1(x, xr, brz);
+                   
                     ere.setVisible(true);
 
                 }
-                /*catch()
-                         {
-                 
-                 }*/
+               
             }
         });
         FormatoTabla ft = new FormatoTabla(0);
         Inventario.setDefaultRenderer(Object.class, ft);
         Todo.setSelected(true);
-        LLenar.setVisible(false);
+        Catalogo.setVisible(true);
         Edit1.setEnabled(false);
         PanelEditar.setVisible(false);
-        AutoCompleteDecorator.decorate(LLenar);
-
+        Todo1.setSelected(false);
+        Label1.setVisible(false);
+        Label2.setVisible(false);
+        Label3.setVisible(false);
+        Label4.setVisible(false);
+        Catalogo.setVisible(false);
+        Producto.setVisible(false);
+        Marca.setVisible(false);
+        Presentacion.setVisible(false);
+        AutoCompleteDecorator.decorate(Catalogo);
+        AutoCompleteDecorator.decorate(Producto);
+        AutoCompleteDecorator.decorate(Marca);
+        AutoCompleteDecorator.decorate(Presentacion);
+        producto2();
+        producto();
+        prese();
+        categoria();
+        medida();
+        modeloBusqueda.setRowCount(0);
+        llenar();
     }
 
     /**
@@ -174,10 +152,8 @@ public class Inventario extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         Inventario = new rojerusan.RSTableMetro();
-        P2 = new javax.swing.JRadioButton();
         Todo = new javax.swing.JRadioButton();
         Generar = new javax.swing.JButton();
-        LLenar = new rojerusan.RSComboMetro();
         PanelEditar = new javax.swing.JPanel();
         NO = new javax.swing.JLabel();
         Edit2 = new javax.swing.JLabel();
@@ -188,15 +164,29 @@ public class Inventario extends javax.swing.JFrame {
         Modificar = new javax.swing.JButton();
         Edit4 = new javax.swing.JLabel();
         StockE = new javax.swing.JTextField();
-        TipoE = new javax.swing.JComboBox<>();
-        MedidaE = new javax.swing.JComboBox<>();
+        Unidad = new javax.swing.JComboBox<>();
         jButton3 = new javax.swing.JButton();
         Contra = new javax.swing.JPasswordField();
         Usuarios = new javax.swing.JComboBox<>();
         NO1 = new javax.swing.JLabel();
+        Ganancia = new javax.swing.JTextField();
+        Edit5 = new javax.swing.JLabel();
+        Edit6 = new javax.swing.JLabel();
+        Cata = new javax.swing.JComboBox<>();
+        Edit7 = new javax.swing.JLabel();
+        Presente = new javax.swing.JComboBox<>();
+        NO2 = new javax.swing.JLabel();
         Edit1 = new javax.swing.JLabel();
-        Nombre = new javax.swing.JRadioButton();
-        Marca = new javax.swing.JRadioButton();
+        Todo1 = new javax.swing.JRadioButton();
+        Producto = new javax.swing.JComboBox<>();
+        Marca = new javax.swing.JComboBox<>();
+        Presentacion = new javax.swing.JComboBox<>();
+        Catalogo = new javax.swing.JComboBox<>();
+        Label2 = new javax.swing.JLabel();
+        Label3 = new javax.swing.JLabel();
+        Label4 = new javax.swing.JLabel();
+        Label1 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         Editar.setText("Editar");
         Editar.addActionListener(new java.awt.event.ActionListener() {
@@ -215,6 +205,9 @@ public class Inventario extends javax.swing.JFrame {
         });
 
         Panel.setBackground(new java.awt.Color(17, 111, 172));
+        Panel.setMinimumSize(new java.awt.Dimension(1350, 560));
+        Panel.setName(""); // NOI18N
+        Panel.setPreferredSize(new java.awt.Dimension(1350, 560));
         Panel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jButton2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
@@ -238,31 +231,11 @@ public class Inventario extends javax.swing.JFrame {
         jLabel1.setText("INVENTARIO");
         Panel.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 10, 300, 44));
 
-        Inventario.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
         Inventario.setColorBackgoundHead(new java.awt.Color(0, 141, 232));
         Inventario.setComponentPopupMenu(Menu);
         jScrollPane2.setViewportView(Inventario);
 
-        Panel.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 160, 1010, 340));
-
-        P2.setForeground(new java.awt.Color(255, 255, 255));
-        P2.setText("Código");
-        P2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                P2ActionPerformed(evt);
-            }
-        });
-        Panel.add(P2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 110, -1, -1));
+        Panel.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 160, 1000, 340));
 
         Todo.setForeground(new java.awt.Color(255, 255, 255));
         Todo.setText("Todo");
@@ -271,7 +244,7 @@ public class Inventario extends javax.swing.JFrame {
                 TodoActionPerformed(evt);
             }
         });
-        Panel.add(Todo, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, -1, -1));
+        Panel.add(Todo, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, -1, -1));
 
         Generar.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         Generar.setForeground(new java.awt.Color(255, 255, 255));
@@ -285,58 +258,34 @@ public class Inventario extends javax.swing.JFrame {
                 GenerarActionPerformed(evt);
             }
         });
-        Panel.add(Generar, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 90, -1, -1));
-
-        LLenar.setColorArrow(new java.awt.Color(0, 141, 232));
-        LLenar.setColorBorde(new java.awt.Color(0, 141, 232));
-        LLenar.setColorFondo(new java.awt.Color(0, 141, 232));
-        LLenar.setFocusCycleRoot(true);
-        LLenar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                LLenarActionPerformed(evt);
-            }
-        });
-        Panel.add(LLenar, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 110, -1, -1));
+        Panel.add(Generar, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 20, -1, -1));
 
         PanelEditar.setBackground(new java.awt.Color(62, 142, 194));
         PanelEditar.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        PanelEditar.setLayout(null);
 
         NO.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         NO.setForeground(new java.awt.Color(255, 255, 255));
         NO.setText("Permiso");
-        PanelEditar.add(NO);
-        NO.setBounds(30, 280, 95, 17);
 
         Edit2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         Edit2.setForeground(new java.awt.Color(255, 255, 255));
-        Edit2.setText("Código");
-        PanelEditar.add(Edit2);
-        Edit2.setBounds(10, 20, 55, 17);
-        PanelEditar.add(CodigoE);
-        CodigoE.setBounds(10, 40, 80, 30);
+        Edit2.setText("Unidad");
 
         ProductoE.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ProductoEActionPerformed(evt);
             }
         });
-        PanelEditar.add(ProductoE);
-        ProductoE.setBounds(10, 109, 80, 30);
 
         Edit3.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         Edit3.setForeground(new java.awt.Color(255, 255, 255));
         Edit3.setText("Producto");
-        PanelEditar.add(Edit3);
-        Edit3.setBounds(10, 90, 95, 17);
 
         MarcaE.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 MarcaEActionPerformed(evt);
             }
         });
-        PanelEditar.add(MarcaE);
-        MarcaE.setBounds(10, 179, 200, 30);
 
         Modificar.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         Modificar.setForeground(new java.awt.Color(255, 255, 255));
@@ -349,14 +298,10 @@ public class Inventario extends javax.swing.JFrame {
                 ModificarActionPerformed(evt);
             }
         });
-        PanelEditar.add(Modificar);
-        Modificar.setBounds(50, 400, 150, 42);
 
         Edit4.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         Edit4.setForeground(new java.awt.Color(255, 255, 255));
         Edit4.setText("Marca");
-        PanelEditar.add(Edit4);
-        Edit4.setBounds(10, 160, 95, 17);
 
         StockE.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -368,19 +313,12 @@ public class Inventario extends javax.swing.JFrame {
                 StockEKeyTyped(evt);
             }
         });
-        PanelEditar.add(StockE);
-        StockE.setBounds(10, 240, 82, 30);
 
-        TipoE.addActionListener(new java.awt.event.ActionListener() {
+        Unidad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TipoEActionPerformed(evt);
+                UnidadActionPerformed(evt);
             }
         });
-        PanelEditar.add(TipoE);
-        TipoE.setBounds(102, 40, 110, 32);
-
-        PanelEditar.add(MedidaE);
-        MedidaE.setBounds(100, 110, 110, 32);
 
         jButton3.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jButton3.setForeground(new java.awt.Color(255, 255, 255));
@@ -393,102 +331,238 @@ public class Inventario extends javax.swing.JFrame {
                 jButton3ActionPerformed(evt);
             }
         });
-        PanelEditar.add(jButton3);
-        jButton3.setBounds(40, 460, 160, 30);
-
-        Contra.setText("jPasswordField1");
-        PanelEditar.add(Contra);
-        Contra.setBounds(20, 360, 112, 32);
 
         Usuarios.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 UsuariosActionPerformed(evt);
             }
         });
-        PanelEditar.add(Usuarios);
-        Usuarios.setBounds(20, 310, 130, 32);
 
         NO1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         NO1.setForeground(new java.awt.Color(255, 255, 255));
         NO1.setText("Stock");
-        PanelEditar.add(NO1);
-        NO1.setBounds(10, 220, 95, 17);
 
-        Panel.add(PanelEditar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1040, 60, 240, 500));
+        Ganancia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GananciaActionPerformed(evt);
+            }
+        });
+        Ganancia.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                GananciaKeyTyped(evt);
+            }
+        });
+
+        Edit5.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        Edit5.setForeground(new java.awt.Color(255, 255, 255));
+        Edit5.setText("Código");
+
+        Edit6.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        Edit6.setForeground(new java.awt.Color(255, 255, 255));
+        Edit6.setText("Categoría");
+
+        Edit7.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        Edit7.setForeground(new java.awt.Color(255, 255, 255));
+        Edit7.setText("Presentación");
+
+        NO2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        NO2.setForeground(new java.awt.Color(255, 255, 255));
+        NO2.setText("Ganancia");
+
+        javax.swing.GroupLayout PanelEditarLayout = new javax.swing.GroupLayout(PanelEditar);
+        PanelEditar.setLayout(PanelEditarLayout);
+        PanelEditarLayout.setHorizontalGroup(
+            PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PanelEditarLayout.createSequentialGroup()
+                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(PanelEditarLayout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addComponent(Contra, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(PanelEditarLayout.createSequentialGroup()
+                        .addGap(49, 49, 49)
+                        .addComponent(Modificar, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(PanelEditarLayout.createSequentialGroup()
+                        .addGap(39, 39, 39)
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(PanelEditarLayout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addComponent(Usuarios, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(PanelEditarLayout.createSequentialGroup()
+                            .addGap(9, 9, 9)
+                            .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(PanelEditarLayout.createSequentialGroup()
+                                    .addComponent(StockE, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(Ganancia, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(PanelEditarLayout.createSequentialGroup()
+                                    .addGap(12, 12, 12)
+                                    .addComponent(NO, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(NO1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(126, 126, 126))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, PanelEditarLayout.createSequentialGroup()
+                            .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(PanelEditarLayout.createSequentialGroup()
+                                    .addContainerGap()
+                                    .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(MarcaE, javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(Edit4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(Edit3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE)
+                                        .addComponent(ProductoE, javax.swing.GroupLayout.Alignment.LEADING)))
+                                .addGroup(PanelEditarLayout.createSequentialGroup()
+                                    .addGap(9, 9, 9)
+                                    .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(Edit5)
+                                        .addComponent(CodigoE, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(NO2, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(Edit6)
+                                    .addComponent(Edit2)
+                                    .addComponent(Cata, 0, 120, Short.MAX_VALUE)
+                                    .addComponent(Unidad, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(Edit7)
+                                    .addComponent(Presente, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        PanelEditarLayout.setVerticalGroup(
+            PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PanelEditarLayout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Edit5)
+                    .addComponent(Edit6))
+                .addGap(2, 2, 2)
+                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(CodigoE, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Cata, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(15, 15, 15)
+                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Edit3)
+                    .addComponent(Edit7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ProductoE, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Presente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(PanelEditarLayout.createSequentialGroup()
+                        .addComponent(Edit4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(MarcaE, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(PanelEditarLayout.createSequentialGroup()
+                        .addComponent(Edit2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(Unidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(23, 23, 23)
+                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NO1)
+                    .addComponent(NO2))
+                .addGap(3, 3, 3)
+                .addGroup(PanelEditarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(StockE, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Ganancia, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(NO)
+                .addGap(11, 11, 11)
+                .addComponent(Usuarios, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(Contra, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(Modificar)
+                .addGap(18, 18, 18)
+                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        Panel.add(PanelEditar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 60, 250, 500));
 
         Edit1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         Edit1.setForeground(new java.awt.Color(255, 255, 255));
         Edit1.setText("Modificar");
         Panel.add(Edit1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1070, 30, -1, -1));
 
-        Nombre.setForeground(new java.awt.Color(255, 255, 255));
-        Nombre.setText("Producto");
-        Nombre.addActionListener(new java.awt.event.ActionListener() {
+        Todo1.setForeground(new java.awt.Color(255, 255, 255));
+        Todo1.setText("Buscar");
+        Todo1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NombreActionPerformed(evt);
+                Todo1ActionPerformed(evt);
             }
         });
-        Panel.add(Nombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 110, -1, -1));
+        Panel.add(Todo1, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 40, -1, -1));
 
-        Marca.setForeground(new java.awt.Color(255, 255, 255));
-        Marca.setText("Marca");
+        Producto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ProductoActionPerformed(evt);
+            }
+        });
+        Panel.add(Producto, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 110, 196, -1));
+
         Marca.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 MarcaActionPerformed(evt);
             }
         });
-        Panel.add(Marca, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 110, -1, -1));
+        Panel.add(Marca, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 110, 196, -1));
+
+        Presentacion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                PresentacionActionPerformed(evt);
+            }
+        });
+        Panel.add(Presentacion, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 110, 196, -1));
+
+        Catalogo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CatalogoActionPerformed(evt);
+            }
+        });
+        Panel.add(Catalogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 110, 196, -1));
+
+        Label2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        Label2.setForeground(new java.awt.Color(255, 255, 255));
+        Label2.setText("Producto");
+        Panel.add(Label2, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 90, -1, -1));
+
+        Label3.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        Label3.setForeground(new java.awt.Color(255, 255, 255));
+        Label3.setText("Marca");
+        Panel.add(Label3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 90, -1, -1));
+
+        Label4.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        Label4.setForeground(new java.awt.Color(255, 255, 255));
+        Label4.setText("Presentación");
+        Panel.add(Label4, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 90, -1, -1));
+
+        Label1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        Label1.setForeground(new java.awt.Color(255, 255, 255));
+        Label1.setText("Categoría");
+        Panel.add(Label1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 90, -1, -1));
+
+        jButton1.setText("Productos Lideres");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        Panel.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 110, -1, -1));
 
         getContentPane().add(Panel, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    private void llenarOtro() {
-        MedidaE.removeAllItems();
-        String sele = (String) TipoE.getSelectedItem();
-
-        if (sele.equals("Longitud")) {
-            for (int i = 0; i < longitud.length; i++) {
-                MedidaE.addItem(longitud[i]);
-            }
-        }
-        if (sele.equals("Unidades")) {
-            for (int i = 0; i < unidad.length; i++) {
-                MedidaE.addItem(unidad[i]);
-            }
-        }
-        if (sele.equals("Volumen")) {
-            for (int i = 0; i < volumen.length; i++) {
-                MedidaE.addItem(volumen[i]);
-            }
-        }
-        if (sele.equals("Area")) {
-            for (int i = 0; i < area.length; i++) {
-                MedidaE.addItem(area[i]);
-            }
-        }
-    }
-
-    private void actua() {
+    private void Buscar() {
+        modeloBusqueda.setRowCount(0);
         try {
+            String datos[] = new String[9];
 
-            DefaultTableModel modeloBusqueda = new DefaultTableModel() {
-                public boolean isCellEditable(int rowIndex, int columnIndex) {
-                    return false;
-                }
-            };
-            modeloBusqueda.addColumn("Codigo");
-            modeloBusqueda.addColumn("Nombre");
-            modeloBusqueda.addColumn("Marca");
-            modeloBusqueda.addColumn("Unidad");
-            modeloBusqueda.addColumn("Existencia");
-            modeloBusqueda.addColumn("Stock Minimo");
-            Inventario.setModel(modeloBusqueda);
-
-            String datos[] = new String[6];
-            int contar = 0;
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Codigo,Nombre,Marca,Medida,Existencia,StockMinimo FROM Producto");
+            ResultSet Ca = sx.executeQuery("SELECT P.Codigo,P.Nombre,P.Marca,U.Medida,W.Categoria,Z.Presentacion,P.Existencia,P.StockMinimo,P.Ganancia FROM Producto P inner join \n"
+                    + "UnidadMedida_1 U on U.id=P.UnidadMedida_1_id inner join Presentacion_1 Z\n"
+                    + "on Z.id=P.Presentacion_1_id"
+                    + " inner join Catalogo W "
+                    + " on W.id=P.Catalogo_id where P.Nombre='" + (String) Producto.getSelectedItem() + "' && P.Marca='" + (String) Marca.getSelectedItem() + "' "
+                    + "&& P.Catalogo_id='" + idCata() + "' && P.Presentacion_1_id='" + idPres() + "'");
             while (Ca.next()) {
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
@@ -496,6 +570,110 @@ public class Inventario extends javax.swing.JFrame {
                 datos[3] = Ca.getString(4);
                 datos[4] = Ca.getString(5);
                 datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+
+                modeloBusqueda.addRow(datos);
+            }
+            Inventario.setModel(modeloBusqueda);
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void medida() {
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT Medida FROM UnidadMedida_1;");
+            while (Ca.next()) {
+                Unidad.addItem(Ca.getString(1));
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void producto2() {
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT Marca FROM Producto;");
+            while (Ca.next()) {
+                Marca.addItem(Ca.getString(1));
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void producto() {
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT Nombre FROM Producto;");
+            while (Ca.next()) {
+                Producto.addItem(Ca.getString(1));
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void prese() {
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT Presentacion FROM Presentacion_1;");
+            while (Ca.next()) {
+                Presente.addItem(Ca.getString(1));
+                Presentacion.addItem(Ca.getString(1));
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void categoria() {
+
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT Categoria FROM Catalogo;");
+            while (Ca.next()) {
+                Cata.addItem(Ca.getString(1));
+                Catalogo.addItem(Ca.getString(1));
+            }
+            Ca.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    private void llenar() {
+        try {
+
+            String datos[] = new String[9];
+            int contar = 0;
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT P.Codigo,P.Nombre,P.Marca,U.Medida,W.Categoria,Z.Presentacion,P.Existencia,P.StockMinimo,P.Ganancia FROM Producto P inner join \n"
+                    + "UnidadMedida_1 U on U.id=P.UnidadMedida_1_id inner join Presentacion_1 Z\n"
+                    + "on Z.id=P.Presentacion_1_id"
+                    + " inner join Catalogo W "
+                    + " on W.id=P.Catalogo_id");
+            while (Ca.next()) {
+                datos[0] = Ca.getString(1);
+                datos[1] = Ca.getString(2);
+                datos[2] = Ca.getString(3);
+                datos[3] = Ca.getString(4);
+                datos[4] = Ca.getString(5);
+                datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+
                 modeloBusqueda.addRow(datos);
                 contar++;
             }
@@ -506,6 +684,73 @@ public class Inventario extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private void actua() {
+        modeloBusqueda.setRowCount(0);
+        try {
+            String datos[] = new String[9];
+
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT P.Codigo,"
+                    + "P.Nombre,P.Marca,U.Medida,W.Categoria,"
+                    + "Z.Presentacion,P.Existencia,P.StockMinimo,"
+                    + "P.Ganancia FROM Producto P inner join \n"
+                    + "UnidadMedida_1 U on U.id=P.UnidadMedida_1_id inner join Presentacion_1 Z\n"
+                    + "on Z.id=P.Presentacion_1_id"
+                    + " inner join Catalogo W "
+                    + " on W.id=P.Catalogo_id");
+            while (Ca.next()) {
+                datos[0] = Ca.getString(1);
+                datos[1] = Ca.getString(2);
+                datos[2] = Ca.getString(3);
+                datos[3] = Ca.getString(4);
+                datos[4] = Ca.getString(5);
+                datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+
+                modeloBusqueda.addRow(datos);
+            }
+            Inventario.setModel(modeloBusqueda);
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private String idCata() {
+        String id = "";
+        String Categoria = (String) Catalogo.getSelectedItem();
+        try {
+
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("select id from Catalogo where Categoria='" + Categoria + "'");
+            while (Ca.next()) {
+                id = Ca.getString(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return id;
+
+    }
+
+    private String idPres() {
+        String id = "";
+        String Categoria = (String) Presentacion.getSelectedItem();
+        try {
+
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("select id from Presentacion_1 where Presentacion='" + Categoria + "'");
+            while (Ca.next()) {
+                id = Ca.getString(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return id;
 
     }
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -521,11 +766,14 @@ public class Inventario extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void llenarCamposAc() {
-        CodigoE.setText(String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 0)));
-        ProductoE.setText(String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 1)));
-        MarcaE.setText(String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 2)));
-        StockE.setText(String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 5)));
-        DI[3] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 3));
+        DatosAntiguos[0] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 0));
+        DatosAntiguos[1] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 1));
+        DatosAntiguos[2] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 2));
+        DatosAntiguos[3] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 3));
+        DatosAntiguos[4] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 4));
+        DatosAntiguos[5] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 5));
+        DatosAntiguos[6] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 7));
+        DatosAntiguos[7] = String.valueOf(Inventario.getValueAt(Inventario.getSelectedRow(), 8));
     }
 
 
@@ -542,10 +790,11 @@ public class Inventario extends javax.swing.JFrame {
                 Edit1.setEnabled(true);
                 llenarCamposAc();
 
-                DI[0] = CodigoE.getText();
-                DI[1] = ProductoE.getText();
-                DI[2] = MarcaE.getText();
-                DI[4] = StockE.getText();
+                CodigoE.setText(DatosAntiguos[0]);
+                ProductoE.setText(DatosAntiguos[1]);
+                MarcaE.setText(DatosAntiguos[2]);
+                StockE.setText(DatosAntiguos[6]);
+                Ganancia.setText(DatosAntiguos[7]);
                 //actualizar(seleccionar);
                 //actua();
             } else {
@@ -559,74 +808,51 @@ public class Inventario extends javax.swing.JFrame {
 
 
     private void TodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TodoActionPerformed
+        if (Todo.isSelected()) {
+            actua();
+            Todo1.setSelected(false);
+            Label1.setVisible(false);
+            Label2.setVisible(false);
+            Label3.setVisible(false);
+            Label4.setVisible(false);
+            Catalogo.setVisible(false);
+            Producto.setVisible(false);
+            Marca.setVisible(false);
+            Presentacion.setVisible(false);
 
-        if (Todo.isSelected() == true) {
-            P2.setSelected(false);
-            llena();
-            Nombre.setSelected(false);
-            Marca.setSelected(false);
-            LLenar.setVisible(false);
         } else {
-            P2.setSelected(true);
-            LLenar.removeAllItems();
-
-            prod();
-            LLenar.setVisible(true);
-
-            Todo.setSelected(false);
+            actua();
+            Todo.setSelected(true);
+            Label1.setVisible(false);
+            Label2.setVisible(false);
+            Label3.setVisible(false);
+            Label4.setVisible(false);
+            Catalogo.setVisible(false);
+            Producto.setVisible(false);
+            Marca.setVisible(false);
+            Presentacion.setVisible(false);
         }
 
 
     }//GEN-LAST:event_TodoActionPerformed
 
-    private void llena() {
-        modeloBusqueda.setRowCount(0);
 
-        try {
-
-            String datos[] = new String[6];
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Codigo,Nombre,Marca,Medida,Existencia,StockMinimo FROM Producto");
-            while (Ca.next()) {
-                datos[0] = Ca.getString(1);
-                datos[1] = Ca.getString(2);
-                datos[2] = Ca.getString(3);
-                datos[3] = Ca.getString(4);
-                datos[4] = Ca.getString(5);
-                datos[5] = Ca.getString(6);
-                modeloBusqueda.addRow(datos);
-            }
-            Inventario.setModel(modeloBusqueda);
-
-        } catch (SQLException ex) {
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
     private void GenerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GenerarActionPerformed
-         if(Nombre.isSelected())
-            {
-                reporteNombre((String)LLenar.getSelectedItem());
-            }
-        if (P2.isSelected()) {
-            ReporteCodiog((String) LLenar.getSelectedItem());
-        }
-        if (Marca.isSelected()) {
-            ReporteMarca((String) LLenar.getSelectedItem());
-        }
-        if (Todo.isSelected()) {
-            Reporte((String) LLenar.getSelectedItem());
+        if (Todo1.isSelected()) {
+            Reporte();
+        } else {
+            ReporteT();
         }
         // TODO add your handling code here:
     }//GEN-LAST:event_GenerarActionPerformed
-    private void Reporte(String Nombre)
-    {
-        try {
+    private void ReporteT() {
 
+        try {
             Connection tr = con.conexion();
             JasperReport reporte = null;
             String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "Inventario_Todo.jasper";
-           // Map parametro = new HashMap();
+            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "R_InventarioT.jasper";
+            // Map parametro = new HashMap();
             //parametro.put("Producto", Nombre);
             reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
             JasperPrint jprint = JasperFillManager.fillReport(reporte, null, tr);
@@ -636,39 +862,24 @@ public class Inventario extends javax.swing.JFrame {
 
             // TODO add your handling code here:
         } catch (JRException ex) {
-            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-    private void ReporteMarca(String Nombre)
-    {
-         try {
 
-            Connection tr = con.conexion();
-            JasperReport reporte = null;
-            String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "Inventario_Marca.jasper";
-            Map parametro = new HashMap();
-            parametro.put("Producto", Nombre);
-            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
-            JasperPrint jprint = JasperFillManager.fillReport(reporte, parametro, tr);
-            JasperViewer view = new JasperViewer(jprint, false);
-            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            view.setVisible(true);
-
-            // TODO add your handling code here:
-        } catch (JRException ex) {
-            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
-    private void ReporteCodiog(String Nombre) {
+
+    private void Reporte() {
         try {
 
             Connection tr = con.conexion();
             JasperReport reporte = null;
             String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "Inventario_Codigo.jasper";
+            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "R_Inventario.jasper";
             Map parametro = new HashMap();
-            parametro.put("Producto", Nombre);
+
+            parametro.put("Categoria", idCata());
+            parametro.put("Presentacion", idPres());
+            parametro.put("Nombre", (String) Producto.getSelectedItem());
+            parametro.put("Marca", (String) Marca.getSelectedItem());
             reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
             JasperPrint jprint = JasperFillManager.fillReport(reporte, parametro, tr);
             JasperViewer view = new JasperViewer(jprint, false);
@@ -681,40 +892,6 @@ public class Inventario extends javax.swing.JFrame {
         }
     }
 
-    private void reporteNombre(String Nombre) {
-        try {
-
-            Connection tr = con.conexion();
-            JasperReport reporte = null;
-            String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "Inventario_Producto.jasper";
-            Map parametro = new HashMap();
-            parametro.put("Producto", Nombre);
-            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
-            JasperPrint jprint = JasperFillManager.fillReport(reporte, parametro, tr);
-            JasperViewer view = new JasperViewer(jprint, false);
-            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            view.setVisible(true);
-
-            // TODO add your handling code here:
-        } catch (JRException ex) {
-            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    private void LLenarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LLenarActionPerformed
-        String Completo = (String) LLenar.getSelectedItem();
-        if (P2.isSelected()) {
-            llenarBus(Completo);
-        }
-        if (Marca.isSelected()) {
-            BusMarca(Completo);
-        }
-        if (Nombre.isSelected()) {
-            BusNombre(Completo);
-
-        }
-        // TODO add your handling code here:
-    }//GEN-LAST:event_LLenarActionPerformed
 
     private void ProductoEActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductoEActionPerformed
         // TODO add your handling code here:
@@ -762,26 +939,35 @@ public class Inventario extends javax.swing.JFrame {
 
         return false;
     }
-    private void ModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ModificarActionPerformed
-        if (vef() == true) {
-            String[] datos = new String[5];
+
+    /*private void mamada()
+    {
+         String[] datos = new String[6];
             datos[0] = CodigoE.getText();
             datos[1] = ProductoE.getText();
             datos[2] = MarcaE.getText();
-            datos[3] = (String) MedidaE.getSelectedItem();
+            datos[3] = idMedida((String) Unidad.getSelectedItem());
             datos[4] = StockE.getText();
-            if (PC(DI, datos) == true || PMNM(DI, datos) == true || PS(DI, datos) == true) {
+            datos[5] = Ganancia.getText();
+            String[] x = new String[3];
+            x = ids((String) Cata.getSelectedItem(), (String) Presente.getSelectedItem(),"s");
+
+            if (PC(DI, datos) == true || PMNM(DI, datos) == true || PS(DI, datos) == true || PG(DI, datos)) {
                 try {
-                    PreparedStatement ActualizarProveedor = cn.prepareStatement("UPDATE Producto SET Codigo='" + datos[0] + "',Nombre='" + datos[1] + "',Marca='" + datos[2] + "',Medida='" + datos[3] + "',StockMinimo='" + datos[4] + "' where id= '" + EI(DI) + "'");
+                    PreparedStatement ActualizarProveedor = cn.prepareStatement("UPDATE Producto P inner join UnidadMedida_1 U on U.id=P.UnidadMedida_1_id "
+                            + "SET P.Codigo='" + datos[0] + "',P.Nombre='" + datos[1] + "',P.Marca='" + datos[2] + "',P.UnidadMedida_1_id='" + datos[3] + "',P.StockMinimo='" + datos[4] + "',P.Ganancia='" + datos[5] + "', "
+                            + " P.Presentacion_1_id='" + x[0] + "',P.Catalogo_id='" + x[1] + "'   "
+                            + "where P.id= '" + EI(DI) + "'");
                     ActualizarProveedor.executeUpdate();
+                    actua();
+                    PanelEditar.setVisible(false);
+                    Edit1.setEnabled(false);
+                    JOptionPane.showMessageDialog(null, "Se modifico con exito el registro");
                 } catch (SQLException ex) {
                     Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                    JOptionPane.showMessageDialog(null, "Hubo un error en el proceso");
 
-                actua();
-                PanelEditar.setVisible(false);
-                Edit1.setEnabled(false);
-                JOptionPane.showMessageDialog(null, "Se modifico con exito el registro");
+                }
 
             } else {
                 JOptionPane.showMessageDialog(null, "No se modifico ningun registro");
@@ -789,16 +975,208 @@ public class Inventario extends javax.swing.JFrame {
                 Edit1.setEnabled(false);
 
             }
+    }*/
+    private Boolean soniguales() {
+        Boolean son = false;
+        DatosNuevos[0] = CodigoE.getText();
+        DatosNuevos[1] = ProductoE.getText();
+        DatosNuevos[2] = MarcaE.getText();
+        DatosNuevos[3] = (String) Unidad.getSelectedItem();
+        DatosNuevos[4] = (String) Cata.getSelectedItem();
+        DatosNuevos[5] = (String) Presente.getSelectedItem();
+        DatosNuevos[6] = StockE.getText();
+        DatosNuevos[7] = Ganancia.getText();
+        for (int i = 0; i < DatosAntiguos.length; i++) {
+            if (DatosAntiguos[i].equals(DatosNuevos[i])) {
+                son = true;
+            } else {
+                return false;
+            }
+        }
+        return son;
+    }
+
+    private Boolean idDisponible() {
+        Boolean Dis = false;
+        if (DatosAntiguos[0].equals(DatosNuevos[0])) {
+            return true;
+        } else {
+            try {
+                Statement sx = Consulta.createStatement();
+                ResultSet Ca = sx.executeQuery("SELECT id FROM Producto where Codigo='" + DatosNuevos[0] + "'");
+                int conta = 0;
+                while (Ca.next()) {
+                    conta++;
+                }
+                if (conta == 0) {
+                    Dis = true;
+                } else {
+
+                    return false;
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return Dis;
+        }
+
+    }
+
+    private void updateTodo() {
+        String[] x = new String[3];
+        x = ids(DatosNuevos[4], DatosNuevos[5], DatosNuevos[3]);
+        try {
+            PreparedStatement ActualizarProveedor = cn.prepareStatement("update Producto P \n"
+                    + "inner join UnidadMedida_1 U \n"
+                    + "on U.id=P.UnidadMedida_1_id\n"
+                    + "inner join Catalogo C\n"
+                    + "on C.id=P.Catalogo_id\n"
+                    + "inner join Presentacion_1 V\n"
+                    + "on V.id=P.Presentacion_1_id\n"
+                    + "set P.Codigo='" + DatosNuevos[0] + "'," //0
+                    + "P.Nombre='" + DatosNuevos[1] + "' ," //1
+                    + "P.Marca='" + DatosNuevos[2] + "'," //2
+                    + "P.UnidadMedida_1_id='" + x[2] + "'," //3
+                    + "P.Catalogo_id='" + x[1] + "'," //4
+                    + "P.Presentacion_1_id='" + x[0] + "'," //5
+                    + "P.StockMinimo='" + DatosNuevos[6] + "'," //6
+                    + "P.Ganancia='" + DatosNuevos[7] + "'" //7
+                    + "where P.id='" + idProducto() + "';");
+            ActualizarProveedor.executeUpdate();
+            actua();
+            PanelEditar.setVisible(false);
+            Edit1.setEnabled(false);
+            JOptionPane.showMessageDialog(null, "Se modifico con exito el registro");
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "Hubo un error en el proceso");
+
+        }
+    }
+
+    private String idProducto() {
+        String id = "";
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT id from Producto where Codigo='" + DatosAntiguos[0] + "'");
+            while (Ca.next()) {
+                id = Ca.getString(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return id;
+    }
+
+    private Boolean Descripciones() {
+        Boolean Dis = false;
+        if (DatosAntiguos[1].equals(DatosNuevos[1])
+                && DatosAntiguos[2].equals(DatosNuevos[2])
+                && DatosAntiguos[3].equals(DatosNuevos[3])
+                && DatosAntiguos[4].equals(DatosNuevos[4])
+                && DatosAntiguos[5].equals(DatosNuevos[5])) {
+            return true;
+        } else {
+            String[] valores = new String[3];
+            valores = ids(DatosNuevos[4], DatosNuevos[5], DatosNuevos[3]);
+            try {
+                Statement sx = Consulta.createStatement();
+                ResultSet Ca = sx.executeQuery("select id from Producto where \n"
+                        + "Nombre='" + DatosNuevos[1] + "' &&\n"
+                        + "Marca='" + DatosNuevos[2] + "' &&\n"
+                        + "UnidadMedida_1_id='" + valores[2] + "' &&\n"
+                        + "Catalogo_id='" + valores[1] + "' &&\n"
+                        + "Presentacion_1_id='" + valores[0] + "';");
+                int conta = 0;
+                while (Ca.next()) {
+                    conta++;
+                }
+                if (conta == 0) {
+                    Dis = true;
+                } else {
+
+                    return false;
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return Dis;
+        }
+
+    }
+
+    private String[] ids(String catalog, String prese, String unidad) {
+        String[] x = new String[3];
+        try {
+
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT id FROM Presentacion_1 where Presentacion='" + prese + "'");
+
+            while (Ca.next()) {
+                x[0] = Ca.getString(1);
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT id FROM UnidadMedida_1 where Medida='" + unidad + "'");
+
+            while (Ca.next()) {
+                x[2] = Ca.getString(1);
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT id FROM Catalogo where Categoria='" + catalog + "'");
+            while (Ca.next()) {
+                x[1] = Ca.getString(1);
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return x;
+    }
+    private void ModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ModificarActionPerformed
+        if (vef() == true) {
+            if (soniguales()) {
+                JOptionPane.showMessageDialog(null, "No se modifico nada");
+                Contra.setText("");
+                //   PanelEditar.setVisible(false);
+
+            } else {
+
+                if (idDisponible()) {
+                    if (Descripciones()) {
+                        updateTodo();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "La Decripción de Producto,Marca,Categoria,Presentacion Y Unidad ya estan siendo Utilizados");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Código: " + CodigoE.getText() + " ya esta registrado");
+                    CodigoE.setText(DatosAntiguos[0]);
+                }
+
+            }
         } else {
             JOptionPane.showMessageDialog(null, "Acceso Denegado");
+            Contra.setText("");
         }
-        Contra.setText("*******");
+
         // TODO add your handling code here:
     }//GEN-LAST:event_ModificarActionPerformed
 
-    private void TipoEActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TipoEActionPerformed
-        llenarOtro();        // TODO add your handling code here:
-    }//GEN-LAST:event_TipoEActionPerformed
+
+    private void UnidadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UnidadActionPerformed
+    }//GEN-LAST:event_UnidadActionPerformed
 
     private void StockEKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_StockEKeyTyped
         int k = (int) evt.getKeyChar();
@@ -826,61 +1204,79 @@ public class Inventario extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_UsuariosActionPerformed
 
-    private void P2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_P2ActionPerformed
-        if (P2.isSelected() == true) {
-            LLenar.removeAllItems();
-            prod();
-            LLenar.setVisible(true);
-            Marca.setSelected(false);
-            Nombre.setSelected(false);
-            Todo.setSelected(false);
-        } else {
-            Todo.setSelected(true);
-            P2.setSelected(false);
-            llena();
-            Nombre.setSelected(false);
-            LLenar.setVisible(false);
-            Marca.setSelected(false);
-        }
-    }//GEN-LAST:event_P2ActionPerformed
+    private void GananciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GananciaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_GananciaActionPerformed
 
-    private void NombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NombreActionPerformed
-        if (Nombre.isSelected() == true) {
-            LLenar.removeAllItems();
-            Nombre();
-            LLenar.setVisible(true);
-            Marca.setSelected(false);
-            P2.setSelected(false);
+    private void GananciaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_GananciaKeyTyped
+        // TODO add your handling code here:
+    }//GEN-LAST:event_GananciaKeyTyped
+
+    private void Todo1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Todo1ActionPerformed
+        if (Todo1.isSelected()) {
             Todo.setSelected(false);
+            Label1.setVisible(true);
+            Label2.setVisible(true);
+            Label3.setVisible(true);
+            Label4.setVisible(true);
+            Catalogo.setVisible(true);
+            Producto.setVisible(true);
+            Marca.setVisible(true);
+            Presentacion.setVisible(true);
+            Buscar();
         } else {
             Todo.setSelected(true);
-            P2.setSelected(false);
-            llena();
-            Nombre.setSelected(false);
-            LLenar.setVisible(false);
-            Marca.setSelected(false);
+            Label1.setVisible(false);
+            Label2.setVisible(false);
+            Label3.setVisible(false);
+            Label4.setVisible(false);
+            Catalogo.setVisible(false);
+            Producto.setVisible(false);
+            Marca.setVisible(false);
+            Presentacion.setVisible(false);
         }
         // TODO add your handling code here:
-    }//GEN-LAST:event_NombreActionPerformed
+    }//GEN-LAST:event_Todo1ActionPerformed
+
+    private void CatalogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CatalogoActionPerformed
+        Buscar();
+        // TODO add your handling code here:
+    }//GEN-LAST:event_CatalogoActionPerformed
+
+    private void ProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductoActionPerformed
+        Buscar();        // TODO add your handling code here:
+    }//GEN-LAST:event_ProductoActionPerformed
 
     private void MarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MarcaActionPerformed
-        if (Marca.isSelected() == true) {
-            LLenar.removeAllItems();
-            Marca();
-            LLenar.setVisible(true);
-            Nombre.setSelected(false);
-            P2.setSelected(false);
-            Todo.setSelected(false);
-        } else {
-            Todo.setSelected(true);
-            P2.setSelected(false);
-            llena();
-            Nombre.setSelected(false);
-            LLenar.setVisible(false);
-            Marca.setSelected(false);
-        }
-// TODO add your handling code here:
+        Buscar();        // TODO add your handling code here:
     }//GEN-LAST:event_MarcaActionPerformed
+
+    private void PresentacionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PresentacionActionPerformed
+        Buscar();
+        // TODO add your handling code here:
+    }//GEN-LAST:event_PresentacionActionPerformed
+    private void reporteee() {
+        try {
+            Connection tr = con.conexion();
+            JasperReport reporte = null;
+            String ruta = System.getProperty("user.dir");
+            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "ProductosLideres.jasper";
+            // Map parametro = new HashMap();
+            //parametro.put("Producto", Nombre);
+            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
+            JasperPrint jprint = JasperFillManager.fillReport(reporte, null, tr);
+            JasperViewer view = new JasperViewer(jprint, false);
+            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            view.setVisible(true);
+        } catch (JRException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+
+        reporteee();
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
     private Boolean PC(String x[], String y[]) {
         if (x[0].equals(y[0])) {
             return false;
@@ -919,9 +1315,9 @@ public class Inventario extends javax.swing.JFrame {
             int c = 0;
             try //sino son iguales pasamos a validar el nombre marca y medida
             {
-                System.out.println("Consulta");
                 Statement sx = Consulta.createStatement();
-                ResultSet Ca = sx.executeQuery("SELECT id From Producto where Nombre='" + y[1] + "' && Marca='" + y[2] + "' && Medida='" + y[3] + "'");
+                ResultSet Ca = sx.executeQuery("SELECT P.id From Producto P inner join UnidadMedida_1 U "
+                        + "ON U.id=P.UnidadMedida_1_id where P.Nombre='" + y[1] + "' && P.Marca='" + y[2] + "' && U.Medida='" + y[3] + "'");
 
                 while (Ca.next()) {
                     c++;
@@ -932,7 +1328,7 @@ public class Inventario extends javax.swing.JFrame {
                     return true;
                 } else {
                     JOptionPane.showMessageDialog(null, "Estos datos ya estan siendo utilizado: " + ProductoE.getText() + ", "
-                            + MarcaE.getText() + ", " + (String) MedidaE.getSelectedItem());
+                            + MarcaE.getText() + ", " + (String) Unidad.getSelectedItem());
                     return false;
 
                 }
@@ -951,11 +1347,20 @@ public class Inventario extends javax.swing.JFrame {
         }
     }
 
+    private Boolean PG(String x[], String y[]) {
+        if (x[5].equals(y[5])) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private String EI(String x[]) {
         String id = null;
         try {
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT id From Producto where Nombre='" + x[1] + "' && Marca='" + x[2] + "' && Medida='" + x[3] + "'");
+            ResultSet Ca = sx.executeQuery("SELECT P.id From Producto P "
+                    + "inner join UnidadMedida_1 U on P.UnidadMedida_1_id=U.id where P.Nombre='" + x[1] + "' && P.Marca='" + x[2] + "' && U.Medida='" + x[3] + "'");
             while (Ca.next()) {
                 id = Ca.getString(1);
             }
@@ -968,12 +1373,14 @@ public class Inventario extends javax.swing.JFrame {
 
     private void llenarBus(String Cod) {
         modeloBusqueda.setRowCount(0);
-
         try {
-
-            String datos[] = new String[6];
+            String datos[] = new String[9];
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Codigo,Nombre,Marca,Medida,Existencia,StockMinimo FROM Producto where Codigo='" + Cod + "'");
+            ResultSet Ca = sx.executeQuery("SELECT P.Codigo,P.Nombre,P.Marca,U.Medida,W.Categoria,Z.Presentacion,P.Existencia,P.StockMinimo,P.Ganancia FROM Producto P inner join \n"
+                    + "UnidadMedida_1 U on U.id=P.UnidadMedida_1_id inner join Presentacion_1 Z\n"
+                    + "on Z.id=P.Presentacion_1_id"
+                    + " inner join Catalogo W "
+                    + " on W.id=P.Catalogo_id where W.Categoria='" + Cod + "'");
             while (Ca.next()) {
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
@@ -981,6 +1388,10 @@ public class Inventario extends javax.swing.JFrame {
                 datos[3] = Ca.getString(4);
                 datos[4] = Ca.getString(5);
                 datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+
                 modeloBusqueda.addRow(datos);
             }
             Inventario.setModel(modeloBusqueda);
@@ -993,12 +1404,14 @@ public class Inventario extends javax.swing.JFrame {
 
     private void BusNombre(String Cod) {
         modeloBusqueda.setRowCount(0);
-
         try {
-
-            String datos[] = new String[6];
+            String datos[] = new String[9];
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Codigo,Nombre,Marca,Medida,Existencia,StockMinimo FROM Producto where Nombre='" + Cod + "'");
+            ResultSet Ca = sx.executeQuery("SELECT P.Codigo,P.Nombre,P.Marca,U.Medida,W.Categoria,Z.Presentacion,P.Existencia,P.StockMinimo,P.Ganancia FROM Producto P inner join \n"
+                    + "UnidadMedida_1 U on U.id=P.UnidadMedida_1_id inner join Presentacion_1 Z\n"
+                    + "on Z.id=P.Presentacion_1_id"
+                    + " inner join Catalogo W "
+                    + " on W.id=P.Catalogo_id where P.Nombre='" + Cod + "'");
             while (Ca.next()) {
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
@@ -1006,6 +1419,10 @@ public class Inventario extends javax.swing.JFrame {
                 datos[3] = Ca.getString(4);
                 datos[4] = Ca.getString(5);
                 datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+
                 modeloBusqueda.addRow(datos);
             }
             Inventario.setModel(modeloBusqueda);
@@ -1018,12 +1435,14 @@ public class Inventario extends javax.swing.JFrame {
 
     private void BusMarca(String Cod) {
         modeloBusqueda.setRowCount(0);
-
         try {
-
-            String datos[] = new String[6];
+            String datos[] = new String[9];
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Codigo,Nombre,Marca,Medida,Existencia,StockMinimo FROM Producto where Marca='" + Cod + "'");
+            ResultSet Ca = sx.executeQuery("SELECT P.Codigo,P.Nombre,P.Marca,U.Medida,W.Categoria,Z.Presentacion,P.Existencia,P.StockMinimo,P.Ganancia FROM Producto P inner join \n"
+                    + "UnidadMedida_1 U on U.id=P.UnidadMedida_1_id inner join Presentacion_1 Z\n"
+                    + "on Z.id=P.Presentacion_1_id"
+                    + " inner join Catalogo W "
+                    + " on W.id=P.Catalogo_id where P.Marca='" + Cod + "'");
             while (Ca.next()) {
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
@@ -1031,6 +1450,10 @@ public class Inventario extends javax.swing.JFrame {
                 datos[3] = Ca.getString(4);
                 datos[4] = Ca.getString(5);
                 datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+
                 modeloBusqueda.addRow(datos);
             }
             Inventario.setModel(modeloBusqueda);
@@ -1050,88 +1473,6 @@ public class Inventario extends javax.swing.JFrame {
             while (Ca.next()) {
 
                 Usuarios.addItem(Ca.getString(1));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
-    private void prod() {
-
-        try {
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Codigo FROM Producto");
-            while (Ca.next()) {
-
-                LLenar.addItem(Ca.getString(1));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
-    private void Nombre() {
-        String aux;
-        try {
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Nombre FROM Producto");
-            while (Ca.next()) {
-                      aux=Ca.getString(1);
-                if(LLenar.getItemCount()==0)
-                {
-                    LLenar.addItem(aux);
-                }
-                else
-                {
-                    Boolean Valor=false;
-                    for (int i = 0; i < LLenar.getItemCount(); i++) {
-                        if(aux.equals(LLenar.getItemAt(i)))
-                        {
-                            Valor=true;
-                        }
-                    }
-                    if(Valor==false)
-                    {
-                       LLenar.addItem(aux); 
-                    }
-
-                }
-                
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
-    private void Marca() {
-        String aux;
-        try {
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Marca FROM Producto");
-            while (Ca.next()) {
-                aux=Ca.getString(1);
-                if(LLenar.getItemCount()==0)
-                {
-                    LLenar.addItem(aux);
-                }
-                else
-                {
-                    Boolean Valor=false;
-                    for (int i = 0; i < LLenar.getItemCount(); i++) {
-                        if(aux.equals(LLenar.getItemAt(i)))
-                        {
-                            Valor=true;
-                        }
-                    }
-                    if(Valor==false)
-                    {
-                       LLenar.addItem(aux); 
-                    }
-
-                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
@@ -1177,32 +1518,44 @@ public class Inventario extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> Cata;
+    private javax.swing.JComboBox<String> Catalogo;
     private javax.swing.JTextField CodigoE;
     private javax.swing.JPasswordField Contra;
     private javax.swing.JLabel Edit1;
     private javax.swing.JLabel Edit2;
     private javax.swing.JLabel Edit3;
     private javax.swing.JLabel Edit4;
+    private javax.swing.JLabel Edit5;
+    private javax.swing.JLabel Edit6;
+    private javax.swing.JLabel Edit7;
     private javax.swing.JMenuItem Editar;
+    private javax.swing.JTextField Ganancia;
     private javax.swing.JButton Generar;
     private rojerusan.RSTableMetro Inventario;
-    private rojerusan.RSComboMetro LLenar;
-    private javax.swing.JRadioButton Marca;
+    private javax.swing.JLabel Label1;
+    private javax.swing.JLabel Label2;
+    private javax.swing.JLabel Label3;
+    private javax.swing.JLabel Label4;
+    private javax.swing.JComboBox<String> Marca;
     private javax.swing.JTextField MarcaE;
-    private javax.swing.JComboBox<String> MedidaE;
     private javax.swing.JPopupMenu Menu;
     private javax.swing.JButton Modificar;
     private javax.swing.JLabel NO;
     private javax.swing.JLabel NO1;
-    private javax.swing.JRadioButton Nombre;
-    private javax.swing.JRadioButton P2;
+    private javax.swing.JLabel NO2;
     private javax.swing.JPanel Panel;
     private javax.swing.JPanel PanelEditar;
+    private javax.swing.JComboBox<String> Presentacion;
+    private javax.swing.JComboBox<String> Presente;
+    private javax.swing.JComboBox<String> Producto;
     private javax.swing.JTextField ProductoE;
     private javax.swing.JTextField StockE;
-    private javax.swing.JComboBox<String> TipoE;
     private javax.swing.JRadioButton Todo;
+    private javax.swing.JRadioButton Todo1;
+    private javax.swing.JComboBox<String> Unidad;
     private javax.swing.JComboBox<String> Usuarios;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;

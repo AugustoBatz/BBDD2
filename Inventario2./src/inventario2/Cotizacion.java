@@ -62,7 +62,7 @@ public class Cotizacion extends javax.swing.JFrame {
         this.setTitle("Cotización - Sistema Inventario BTZ");
        // this.setSize(650,550);
          Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/4-this.getSize().width/4, dim.height/10-this.getSize().height/10);
+ this.setLocationRelativeTo(null);        
         modelo.setRowCount(0);
         modelo.addColumn("Cantidad");//0
         modelo.addColumn("Nombre");//1
@@ -397,7 +397,7 @@ public class Cotizacion extends javax.swing.JFrame {
 
     private void addcliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addcliActionPerformed
         // TODO add your handling code here:
-        Clientes cl = new Clientes();
+        ClientesV1 cl = new ClientesV1();
         cl.setVisible(true);
     }//GEN-LAST:event_addcliActionPerformed
 

@@ -67,6 +67,7 @@ public class Ingreso extends javax.swing.JFrame {
         initComponents();
            this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
  this.setTitle("Ingreso De Producotos- Sistema Inventario BTZ");
+ this.setLocationRelativeTo(null);        
 
            Serie.requestFocus();
     volumen[0]="Litros";
@@ -329,8 +330,6 @@ public class Ingreso extends javax.swing.JFrame {
         jLabel19.setForeground(new java.awt.Color(255, 255, 255));
         jLabel19.setText("Fecha");
         palenparaprov.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 20, -1, -1));
-
-        Fecha.setDateFormatString("yyyy-MM-d");
         palenparaprov.add(Fecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 50, 152, -1));
 
         jPanel2.add(palenparaprov, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 530, 290));

@@ -49,7 +49,8 @@ public class Mostrarventas extends javax.swing.JFrame {
         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
         Todo.setSelected(true);
         this.setTitle("Registro De Ventas - Sistema Inventario BTZ");
-        
+         this.setLocationRelativeTo(null);        
+
         modeloBusqueda.addColumn("Fecha Compra");
         modeloBusqueda.addColumn("Serie");
         modeloBusqueda.addColumn("Número");

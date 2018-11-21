@@ -15,8 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -30,22 +28,24 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
  * @author chr97lubuntu
  */
 public class verclientes extends javax.swing.JFrame {
-      
+
     Conexion con = new Conexion();
-        Connection cn = con.conexion();
+    Connection cn = con.conexion();
 
     Connection Consulta = con.conexion();
-    private String[] DI=new String [6];
-    private String Usuario=null;
+    private String[] DI = new String[6];
+    private String Usuario = null;
+
     /**
      * Creates new form verclientes
      */
     public verclientes() {
         initComponents();
-        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
+        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
         PanelEditar.setVisible(false);
-        
-        DefaultTableModel modelo=new DefaultTableModel(){
+        this.setLocationRelativeTo(null);
+
+        DefaultTableModel modelo = new DefaultTableModel() {
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return false;
             }
@@ -58,12 +58,12 @@ public class verclientes extends javax.swing.JFrame {
         modelo.addColumn("Correo");
         modelo.addColumn("Dirección");
         tcli.setModel(modelo);
-        
-       String datos[] = new String[6];
+
+        String datos[] = new String[6];
         try {
             Statement sx = Consulta.createStatement();
             ResultSet Ca = sx.executeQuery("SELECT Nit, NombreC, Apellido, Numero,Correo, Direccion FROM Cliente;");
-            while(Ca.next()){
+            while (Ca.next()) {
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
                 datos[2] = Ca.getString(3);
@@ -71,18 +71,17 @@ public class verclientes extends javax.swing.JFrame {
                 datos[4] = Ca.getString(5);
                 datos[5] = Ca.getString(6);
                 modelo.addRow(datos);
-                
-                
+
             }
             tcli.setModel(modelo);
-            
-        }catch(SQLException ex){
+
+        } catch (SQLException ex) {
             Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
         }
         tcli.setVisible(true);
-        
-        
+
     }
+
     private void us() {
         AutoCompleteDecorator.decorate(Usuarios);
         Usuarios.removeAllItems();
@@ -135,6 +134,7 @@ public class verclientes extends javax.swing.JFrame {
         Correo = new javax.swing.JTextField();
         Dir1 = new javax.swing.JLabel();
         Edit5 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
 
         jMenuItem1.setText("Editar");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
@@ -341,6 +341,14 @@ public class verclientes extends javax.swing.JFrame {
         Edit5.setText("Modificar");
         jPanel1.add(Edit5, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 10, -1, -1));
 
+        jButton2.setText("Clientes Potenciales");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 450, -1, -1));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -361,19 +369,20 @@ public class verclientes extends javax.swing.JFrame {
 
     private void addcliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addcliActionPerformed
         // TODO add your handling code here:
-        Clientes cls = new Clientes();
+
+        ClientesV1 cls = new ClientesV1();
         cls.setVisible(true);
-        
+
     }//GEN-LAST:event_addcliActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         try {
             Connection tr = con.conexion();
-            JasperReport reporte= null;
-            String path="/home/sys515/Documentos/ProyecoPEPS/Inventario2-master/Inventario2./src/Reportes/report1.jasper";
-            reporte= (JasperReport) JRLoader.loadObjectFromFile(path);
-            JasperPrint jprint =JasperFillManager.fillReport(reporte,null,tr);
-            JasperViewer view = new JasperViewer(jprint,false);
+            JasperReport reporte = null;
+            String path = "/home/sys515/Documentos/ProyecoPEPS/Inventario2-master/Inventario2./src/Reportes/report1.jasper";
+            reporte = (JasperReport) JRLoader.loadObjectFromFile(path);
+            JasperPrint jprint = JasperFillManager.fillReport(reporte, null, tr);
+            JasperViewer view = new JasperViewer(jprint, false);
             view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             view.setVisible(true);
 
@@ -391,43 +400,36 @@ public class verclientes extends javax.swing.JFrame {
     private void ApellidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ApellidoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_ApellidoActionPerformed
-     private Boolean vef()
-    {
-       
-        
-        
-        char claves[]=Contra.getPassword();
-        String clavedef=new String(claves);
-        int c=0;
-        try{
+    private Boolean vef() {
+
+        char claves[] = Contra.getPassword();
+        String clavedef = new String(claves);
+        int c = 0;
+        try {
             Statement sx = Consulta.createStatement();
             ResultSet Ca = sx.executeQuery("SELECT Usuario, Contraseña, Privilegios FROM Usuarios");
-            while (Ca.next()) 
-            {
+            while (Ca.next()) {
                 c++;
-                if(c!=0)
-                {
-               // System.out.println(Ca.getString(1)+" -- "+Ca.getString(2));
-               // System.out.println(us+"***"+clavedef);
-               if((Usuario.equals(Ca.getString(1)))&&(clavedef.equals(Ca.getString(2)))&&Ca.getString(3).equals("Administrador"))
-                {
-                   return true;
+                if (c != 0) {
+                    // System.out.println(Ca.getString(1)+" -- "+Ca.getString(2));
+                    // System.out.println(us+"***"+clavedef);
+                    if ((Usuario.equals(Ca.getString(1))) && (clavedef.equals(Ca.getString(2))) && Ca.getString(3).equals("Administrador")) {
+                        return true;
+                    }
+                } else {
+                    return false;
                 }
-                }
-                else
-                {
-                   return false;
-                }
-                              
+
             }
-            
-        }catch(SQLException ex){
+
+        } catch (SQLException ex) {
             Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
         }
-     
+
         return false;
     }
-     private void actua() {
+
+    private void actua() {
         try {
 
             DefaultTableModel modeloBusqueda = new DefaultTableModel() {
@@ -441,14 +443,14 @@ public class verclientes extends javax.swing.JFrame {
             modeloBusqueda.addColumn("Telefono");
             modeloBusqueda.addColumn("Correo");
             modeloBusqueda.addColumn("Direccion");
-           
+
             tcli.setModel(modeloBusqueda);
 
             String datos[] = new String[6];
             int contar = 0;
             Statement sx = Consulta.createStatement();
             ResultSet Ca = sx.executeQuery("SELECT Nit, NombreC, Apellido, Numero, Correo,Direccion FROM Cliente;");
-            while(Ca.next()){
+            while (Ca.next()) {
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
                 datos[2] = Ca.getString(3);
@@ -457,7 +459,7 @@ public class verclientes extends javax.swing.JFrame {
                 datos[5] = Ca.getString(6);
                 modeloBusqueda.addRow(datos);
                 contar++;
-                
+
             }
             tcli.setModel(modeloBusqueda);
             if (contar == 0) {
@@ -468,61 +470,53 @@ public class verclientes extends javax.swing.JFrame {
         }
 
     }
-     private Boolean ValidarNit(String nit,String onit)
-     {
-        if(nit.equals(onit))
-        {
+
+    private Boolean ValidarNit(String nit, String onit) {
+        if (nit.equals(onit)) {
             return true;
-        }
-        else
-        {
-            try 
-            {
+        } else {
+            try {
                 Statement sx = Consulta.createStatement();
-                ResultSet Ca = sx.executeQuery("Select id from Cliente where Nit='"+nit+"'");
-                while(Ca.next())
-                {
+                ResultSet Ca = sx.executeQuery("Select id from Cliente where Nit='" + nit + "'");
+                while (Ca.next()) {
                     return false;
                 }
                 return true;
             } catch (SQLException ex) {
                 Logger.getLogger(verclientes.class.getName()).log(Level.SEVERE, null, ex);
             }
-        return false;
+            return false;
         }
-     }
-     private String CI(String nit)
-     {
-        String h="";
+    }
+
+    private String CI(String nit) {
+        String h = "";
         try {
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("Select id from Cliente where Nit='"+nit+"'");
-            while(Ca.next())
-            {
-               h=Ca.getString(1);
+            ResultSet Ca = sx.executeQuery("Select id from Cliente where Nit='" + nit + "'");
+            while (Ca.next()) {
+                h = Ca.getString(1);
             }
-           return h;
+            return h;
         } catch (SQLException ex) {
             Logger.getLogger(verclientes.class.getName()).log(Level.SEVERE, null, ex);
         }
         return h;
-     }
-     
+    }
+
     private void ModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ModificarActionPerformed
-           if(vef()==true)
-        {
-        String[] datos = new String[6];
-        datos[0]=Nit.getText();
-        datos[1] = Nombre.getText();
-        datos[2] = Apellido.getText();
-        datos[3] = Telefono.getText();
-        datos[4] = Correo.getText();
-        datos[5] = Direccion.getText();
-            if(ValidarNit(datos[0],DI[0])==true)
-            {
+        if (vef() == true) {
+            String[] datos = new String[6];
+            datos[0] = Nit.getText();
+            datos[1] = Nombre.getText();
+            datos[2] = Apellido.getText();
+            datos[3] = Telefono.getText();
+            datos[4] = Correo.getText();
+            datos[5] = Direccion.getText();
+            if (ValidarNit(datos[0], DI[0]) == true) {
                 try {
-                    PreparedStatement ActualizarProveedor = cn.prepareStatement("UPDATE Cliente SET Nit='"+datos[0]+"',NombreC='"+datos[1]+"',Apellido='"+datos[2]+"',Numero='"+datos[3]+"',Direccion='"+datos[5]+"',Correo='"+datos[4]+"' where id= '"+CI(DI[0])+"'");
-                            ActualizarProveedor.executeUpdate();
+                    PreparedStatement ActualizarProveedor = cn.prepareStatement("UPDATE Cliente SET Nit='" + datos[0] + "',NombreC='" + datos[1] + "',Apellido='" + datos[2] + "',Numero='" + datos[3] + "',Direccion='" + datos[5] + "',Correo='" + datos[4] + "' where id= '" + CI(DI[0]) + "'");
+                    ActualizarProveedor.executeUpdate();
                 } catch (SQLException ex) {
                     Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -531,16 +525,12 @@ public class verclientes extends javax.swing.JFrame {
                 PanelEditar.setVisible(false);
                 Edit5.setEnabled(false);
                 JOptionPane.showMessageDialog(null, "Se modifico con exito el registro");
-            }
-            else
-            {
+            } else {
                 JOptionPane.showMessageDialog(null, "Este nit ya esta registrado");
 
             }
-        }
-        else
-        {
-           JOptionPane.showMessageDialog(null, "Acceso Denegado"); 
+        } else {
+            JOptionPane.showMessageDialog(null, "Acceso Denegado");
         }
         PanelEditar.setVisible(false);
         Contra.setText("*****");
@@ -552,7 +542,7 @@ public class verclientes extends javax.swing.JFrame {
     }//GEN-LAST:event_DireccionActionPerformed
 
     private void DireccionKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_DireccionKeyTyped
-       
+
         // TODO add your handling code here:
     }//GEN-LAST:event_DireccionKeyTyped
 
@@ -563,26 +553,25 @@ public class verclientes extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void UsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UsuariosActionPerformed
-         Usuario= (String) Usuarios.getSelectedItem();
+        Usuario = (String) Usuarios.getSelectedItem();
 
         // TODO add your handling code here:
     }//GEN-LAST:event_UsuariosActionPerformed
-     private void llenarCamposAc()
-    {
+    private void llenarCamposAc() {
         Nit.setText(String.valueOf(tcli.getValueAt(tcli.getSelectedRow(), 0)));
         Nombre.setText(String.valueOf(tcli.getValueAt(tcli.getSelectedRow(), 1)));
         Apellido.setText(String.valueOf(tcli.getValueAt(tcli.getSelectedRow(), 2)));
         Telefono.setText(String.valueOf(tcli.getValueAt(tcli.getSelectedRow(), 3)));
         Direccion.setText(String.valueOf(tcli.getValueAt(tcli.getSelectedRow(), 5)));
         Correo.setText(String.valueOf(tcli.getValueAt(tcli.getSelectedRow(), 4)));
-       
+
     }
-  
+
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-          us();
+        us();
         int seleccionar = 0;
         seleccionar = tcli.getSelectedRow();
-        Boolean xp=true;
+        Boolean xp = true;
         if (seleccionar == -1) {
             JOptionPane.showMessageDialog(null, "Seleccione un fila valida");
         } else {
@@ -590,14 +579,13 @@ public class verclientes extends javax.swing.JFrame {
                 PanelEditar.setVisible(true);
                 Edit1.setEnabled(true);
                 llenarCamposAc();
-               
-                 
-                 DI[0]=Nit.getText();
-                 DI[1]=Nombre.getText();
-                 DI[2]=Apellido.getText();
-                 DI[3]=Telefono.getText();
-                 DI[4]=Correo.getText();
-                 DI[5]=Direccion.getText();
+
+                DI[0] = Nit.getText();
+                DI[1] = Nombre.getText();
+                DI[2] = Apellido.getText();
+                DI[3] = Telefono.getText();
+                DI[4] = Correo.getText();
+                DI[5] = Direccion.getText();
                 //actualizar(seleccionar);
                 //actua();
             } else {
@@ -605,7 +593,6 @@ public class verclientes extends javax.swing.JFrame {
 
             }
         }
-
 
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem1ActionPerformed
@@ -615,7 +602,7 @@ public class verclientes extends javax.swing.JFrame {
     }//GEN-LAST:event_TelefonoActionPerformed
 
     private void TelefonoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TelefonoKeyTyped
-         int k = (int) evt.getKeyChar();
+        int k = (int) evt.getKeyChar();
         if (k >= 97 && k <= 127 || k >= 58 && k <= 97) {
             evt.setKeyChar((char) KeyEvent.VK_CLEAR);
             JOptionPane.showMessageDialog(null, "No puede ingresar letras!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
@@ -643,10 +630,35 @@ public class verclientes extends javax.swing.JFrame {
     }//GEN-LAST:event_CorreoKeyTyped
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-Menu x=new Menu();
-x.setVisible(true);
-dispose();// TODO add your handling code here:
+        Menu x = new Menu();
+        x.setVisible(true);
+        dispose();// TODO add your handling code here:
     }//GEN-LAST:event_formWindowClosing
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        reporte();
+    }//GEN-LAST:event_jButton2ActionPerformed
+    private void reporte() {
+
+        try {
+            Connection tr = con.conexion();
+            JasperReport reporte = null;
+            String ruta = System.getProperty("user.dir");
+            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "ClientesLideres.jasper";
+            // Map parametro = new HashMap();
+            //parametro.put("Producto", Nombre);
+            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
+            JasperPrint jprint = JasperFillManager.fillReport(reporte, null, tr);
+            JasperViewer view = new JasperViewer(jprint, false);
+            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            view.setVisible(true);
+
+            // TODO add your handling code here:
+        } catch (JRException ex) {
+            Logger.getLogger(verclientes.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
 
     /**
      * @param args the command line arguments
@@ -705,6 +717,7 @@ dispose();// TODO add your handling code here:
     private javax.swing.JComboBox<String> Usuarios;
     private javax.swing.JButton addcli;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;

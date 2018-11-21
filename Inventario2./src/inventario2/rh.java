@@ -6,7 +6,10 @@
 package inventario2;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -24,33 +27,35 @@ import javax.swing.table.TableColumnModel;
 public class rh extends javax.swing.JFrame {
     Conexion con = new Conexion();
     Connection Consulta = con.conexion();
-
+     private String idUsuario="";
     /**
      * Creates new form rh
      */
+       DefaultTableModel modelo = new DefaultTableModel() {
+                public boolean isCellEditable(int rowIndex, int columnIndex) {
+                    return false;
+                }
+        };
     public rh() {
         initComponents();
                         this.setTitle("Recursos Humanos - Sistema Inventario BTZ");
 
         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-        DefaultTableModel modelo = new DefaultTableModel() {
-                public boolean isCellEditable(int rowIndex, int columnIndex) {
-                    return false;
-                }
-        };
+ this.setLocationRelativeTo(null);        
+      
         modelo.addColumn("Nombre");
         modelo.addColumn("Apellido");
         modelo.addColumn("DPI");
         modelo.addColumn("Usuario");
         modelo.addColumn("Puesto");
+        modelo.addColumn("Estado");
         emple.setModel(modelo);
-        String datos[] = new String[5];
+        String datos[] = new String[6];
         try {
 
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Nombre, Apellido, DPI, Usuario, Privilegios FROM Usuarios");
+            ResultSet Ca = sx.executeQuery("SELECT Nombre, Apellido, DPI, Usuario, Privilegios,Activo FROM Usuarios");
           
             while (Ca.next()) {
                
@@ -59,6 +64,14 @@ public class rh extends javax.swing.JFrame {
                 datos[2] = Ca.getString(3);
                 datos[3] = Ca.getString(4);
                 datos[4] = Ca.getString(5);
+                if(Ca.getString(6).equals("1"))
+                {
+                    datos[5]="Activo";
+                }
+                else
+                {
+                    datos[5]="De Baja";
+                }
                 
                              
                 modelo.addRow(datos);
@@ -67,7 +80,7 @@ public class rh extends javax.swing.JFrame {
             emple.setModel(modelo);
             
         } catch (SQLException ex) {
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(rh.class.getName()).log(Level.SEVERE, null, ex);
         }
         emple.setVisible(true);
         
@@ -88,6 +101,9 @@ public class rh extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         emple = new javax.swing.JTable();
         regresar = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -136,6 +152,30 @@ public class rh extends javax.swing.JFrame {
         });
         jPanel1.add(regresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 380, 50, -1));
 
+        jButton1.setText("<html>EDITAR</html>");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 320, 90, 70));
+
+        jButton2.setText("<html>DAR DE BAJA</html>");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 150, 90, 70));
+
+        jButton3.setText("<html>DAR DE ALTA</html>");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, 90, 70));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -166,12 +206,136 @@ public class rh extends javax.swing.JFrame {
         dispose();
         
     }//GEN-LAST:event_regresarActionPerformed
+    private void actualizar()
+    {
+        modelo.setRowCount(0);
+         String datos[] = new String[6];
+        try {
 
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT Nombre, Apellido, DPI, Usuario, Privilegios,Activo FROM Usuarios");
+          
+            while (Ca.next()) {
+               
+                datos[0] = Ca.getString(1);
+                datos[1] = Ca.getString(2);
+                datos[2] = Ca.getString(3);
+                datos[3] = Ca.getString(4);
+                datos[4] = Ca.getString(5);
+                if(Ca.getString(6).equals("1"))
+                {
+                    datos[5]="Activo";
+                }
+                else
+                {
+                    datos[5]="De Baja";
+                }
+                
+                             
+                modelo.addRow(datos);
+                
+            }
+            emple.setModel(modelo);
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         Menu x=new Menu();
         x.setVisible(true);
         dispose();// TODO add your handling code here:
     }//GEN-LAST:event_formWindowClosing
+ private Boolean construir(){
+        LoginView n=new LoginView(null,true);
+        new LoginController(n);
+        n.addWindowListener(new WindowAdapter(){
+             @Override
+             public void windowClosing(WindowEvent we )
+             {
+                 System.exit(0);
+             }
+        });
+        n.pack();
+        n.setLocationRelativeTo(null);
+        
+        n.setVisible(true);
+        idUsuario=n.getRol();
+        if(idUsuario.equals(""))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    private void dardebaja()
+    {
+        try {
+            PreparedStatement ActualizarProveedor = Consulta.prepareStatement("UPDATE "
+                    + "Usuarios SET Activo=false where DPI='"+String.valueOf(emple.getValueAt(emple.getSelectedRow(), 2))+"'");
+            ActualizarProveedor.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(rh.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+     private void dardealta()
+    {
+        try {
+            PreparedStatement ActualizarProveedor = Consulta.prepareStatement("UPDATE "
+                    + "Usuarios SET Activo=true where DPI='"+String.valueOf(emple.getValueAt(emple.getSelectedRow(), 2))+"'");
+            ActualizarProveedor.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(rh.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        int seleccionar = 0;
+        seleccionar = emple.getSelectedRow();
+        if (seleccionar != -1) {
+            if (construir()) {
+                    dardebaja();
+                    actualizar();
+            } else {
+                JOptionPane.showMessageDialog(null, "Acceso Denegado");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Seleccione Un Empleado");
+        }
+           // TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+
+        int seleccionar = 0;
+        seleccionar = emple.getSelectedRow();
+        if (seleccionar != -1) {
+            if (construir()) {
+                dardealta();
+                actualizar();
+            } else {
+                JOptionPane.showMessageDialog(null, "Acceso Denegado");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Seleccione Un Empleado");
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+         int seleccionar = 0;
+        seleccionar = emple.getSelectedRow();
+        if (seleccionar != -1) {
+            if (construir()) {
+                
+            } else {
+                JOptionPane.showMessageDialog(null, "Acceso Denegado");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Seleccione Un Empleado");
+        }
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -212,6 +376,9 @@ public class rh extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addemple;
     private javax.swing.JTable emple;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton regresar;

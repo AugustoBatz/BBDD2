@@ -38,8 +38,7 @@ Conexion con = new Conexion();
         this.setResizable(false);
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-        
+ this.setLocationRelativeTo(null);        
     }
 
     /**
@@ -192,9 +191,7 @@ Conexion con = new Conexion();
             
         }
         else{
-           // JOptionPane.showMessageDialog(null, "Datos incorrectos");
-            //System.out.println("no");
-            //JOptionPane.showMessageDialog(null," Aprendiendo a poner imagenes ", "Imagen Java", JOptionPane.PLAIN_MESSAGE, icono);
+           
             notificacion nt = new notificacion();
             nt.setVisible(true);
         }

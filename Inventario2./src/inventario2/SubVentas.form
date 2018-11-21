@@ -103,7 +103,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="210" y="300" width="330" height="120"/>
+              <AbsoluteConstraints x="50" y="210" width="330" height="120"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -189,7 +189,7 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/iconoso/icons8-historial-de-pedidos-100.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Registro de ventas"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;Facuturas Anuladas&lt;/html&gt;"/>
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="contentAreaFilled" type="boolean" value="false"/>
             <Property name="rolloverIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
@@ -201,7 +201,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="30" y="190" width="330" height="120"/>
+              <AbsoluteConstraints x="230" y="310" width="330" height="120"/>
             </Constraint>
           </Constraints>
         </Component>

@@ -60,6 +60,8 @@ public class LotesMostrar extends javax.swing.JFrame {
     public LotesMostrar(String x, String Y, String Z) {
         
        initComponents();
+        this.setLocationRelativeTo(null);        
+
        EditarDetalle.setVisible(false);
        Todo.setSelected(true);
         try {

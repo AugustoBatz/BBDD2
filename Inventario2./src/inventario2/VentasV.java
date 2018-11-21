@@ -78,6 +78,7 @@ public class VentasV extends javax.swing.JFrame {
     public VentasV() {
         initComponents();
                 this.setTitle("Ventas- Sistema Inventario BTZ");
+ this.setLocationRelativeTo(null);        
 
         //Producto.requestFocus();
        textAutoCompleter = new TextAutoCompleter(Pr);
@@ -408,8 +409,6 @@ public class VentasV extends javax.swing.JFrame {
         Serie.setText("jLabel15");
 
         Numero.setText("jLabel15");
-
-        Fech.setDateFormatString("yyyy-MM-d");
 
         id.setText("jLabel19");
 
@@ -1271,7 +1270,7 @@ public class VentasV extends javax.swing.JFrame {
 
     private void addcliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addcliActionPerformed
         // TODO add your handling code here:
-        Clientes cl = new Clientes();
+        ClientesV1 cl = new ClientesV1();
         cl.setVisible(true);
         dispose();
 

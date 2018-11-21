@@ -43,7 +43,7 @@ public class ClientesV1 extends javax.swing.JFrame {
                 this.setTitle("Ingreso Cliente- Sistema Inventario BTZ");
              //   this.setSize(561, 250);
                 Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/4-this.getSize().width/4, dim.height/10-this.getSize().height/10);
+ this.setLocationRelativeTo(null);        
 
     }
 

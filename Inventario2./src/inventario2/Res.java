@@ -47,11 +47,11 @@ public class Res extends javax.swing.JFrame {
         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
+ this.setLocationRelativeTo(null);        
         modeloBusqueda.addColumn("Serie");
         modeloBusqueda.addColumn("Rango Incial");
         modeloBusqueda.addColumn("Rango Final");
-        modeloBusqueda.addColumn("Rango Actual");
+        modeloBusqueda.addColumn("Correlativo");
         modeloBusqueda.addColumn("Fecha");
         modeloBusqueda.addColumn("Número de Resolución ");
         modeloBusqueda.addColumn("Estado");

@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -33,17 +34,19 @@ public class Clientes extends javax.swing.JFrame {
     Conexion con = new Conexion();
     Connection cn = con.conexion();
     Connection tr = con.conexion();
-
+    private ArrayList<String> EDetalles=new ArrayList<String>();
     /**
      * Creates new form Clientes
      */
-    public Clientes() {
+    public Clientes(ArrayList<String> RDetalles) {
         initComponents();
+        EDetalles=RDetalles;
         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
                 this.setTitle("Ingreso Cliente- Sistema Inventario BTZ");
              //   this.setSize(561, 250);
                 Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/4-this.getSize().width/4, dim.height/10-this.getSize().height/10);
+ this.setLocationRelativeTo(null);        
+       
 
     }
 
@@ -204,24 +207,21 @@ public class Clientes extends javax.swing.JFrame {
                     Apellido.setText("");
                     Telefono.setText("");
                     Correo.setText("");
-                    Ventas c=new Ventas();
+                    Ventas c=new Ventas(EDetalles);
+                  
                     c.setVisible(true);
                     dispose();
 
                 } else {
                     JOptionPane.showMessageDialog(null, "Usted ya tiene Registrado el Nit " + Nit.getText());
-                    Nombre.setText("");
                     Nit.setText("");
-                    Direccion.setText("");
-                    Apellido.setText("");
-                    Telefono.setText("");
-                    Correo.setText("");
+                    
 
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(IngresarProve.class.getName()).log(Level.SEVERE, null, ex);
             }
-            dispose();
+          
         }
 
     }//GEN-LAST:event_botonagregarActionPerformed
@@ -260,7 +260,7 @@ public class Clientes extends javax.swing.JFrame {
     }//GEN-LAST:event_CorreoFocusLost
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-Ventas c=new Ventas();
+Ventas c=new Ventas(EDetalles);
                     c.setVisible(true);
                     dispose();        // TODO add your handling code here:
     }//GEN-LAST:event_formWindowClosing
@@ -280,7 +280,7 @@ Ventas c=new Ventas();
             CrearCli.setString(6, Correo.getText());
             CrearCli.executeUpdate();
             CrearCli.close();
-            JOptionPane.showMessageDialog(null, "Nuevo Proveedor Agregado");
+            JOptionPane.showMessageDialog(null, "Nuevo Cliente Agregado");
 
         } catch (SQLException ex) {
             Logger.getLogger(IngresarProve.class.getName()).log(Level.SEVERE, null, ex);
@@ -316,7 +316,7 @@ Ventas c=new Ventas();
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Clientes().setVisible(true);
+                new Clientes(null).setVisible(true);
             }
         });
     }

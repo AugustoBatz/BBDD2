@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ecb0cb94-f717-4145-b485-56e76c9adfda">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[select c.NombreC,
+    sum(f.Total) Importe_Total,
+    count(f.id) Numero_Facturas
+from FacturaVenta f, Cliente c
+where f.Cliente_id =c.id && f.Anulado=false
+group by f.Cliente_id 
+order by Importe_Total desc limit 5;]]>
+	</queryString>
+	<field name="NombreC" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="Importe_Total" class="java.math.BigDecimal"/>
+	<field name="Numero_Facturas" class="java.lang.Long"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="39" splitType="Stretch">
+			<staticText>
+				<reportElement x="285" y="0" width="284" height="38" uuid="ddad7649-d3a6-4d60-abea-d42aae484ed0"/>
+				<textElement>
+					<font size="18"/>
+				</textElement>
+				<text><![CDATA[Clientes Potenciales]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="55" height="20" uuid="2a87cf95-5011-4561-bfc8-abf65f0329f4"/>
+				<text><![CDATA[Cliente]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="55" y="0" width="82" height="20" uuid="6c594d1b-7768-49f1-8da7-ffa14e8013eb"/>
+				<textFieldExpression><![CDATA[$F{NombreC}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="137" y="0" width="100" height="20" uuid="effde387-7c79-494f-9528-e35971ec22db"/>
+				<text><![CDATA[Total En Facturas]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="237" y="0" width="100" height="20" uuid="61a56526-762a-4828-8ad9-a88165658024"/>
+				<textFieldExpression><![CDATA[$F{Importe_Total}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="337" y="0" width="100" height="20" uuid="544d2da8-6427-4106-9cea-4665d299d848"/>
+				<text><![CDATA[Total De Facturas]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="437" y="0" width="100" height="20" uuid="ebcce138-3584-409b-ab85-655573dd190d"/>
+				<textFieldExpression><![CDATA[$F{Numero_Facturas}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="256" splitType="Stretch">
+			<stackedBar3DChart>
+				<chart>
+					<reportElement x="149" y="86" width="437" height="170" uuid="9f2f8f92-4844-439a-868d-65949f745b66"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<categoryDataset>
+					<categorySeries>
+						<seriesExpression><![CDATA["Cliente"]]></seriesExpression>
+						<categoryExpression><![CDATA[$F{NombreC}]]></categoryExpression>
+						<valueExpression><![CDATA[$F{Importe_Total}]]></valueExpression>
+						<labelExpression><![CDATA["Total En Facturas"]]></labelExpression>
+					</categorySeries>
+				</categoryDataset>
+				<bar3DPlot>
+					<plot/>
+					<itemLabel/>
+					<categoryAxisFormat>
+						<axisFormat/>
+					</categoryAxisFormat>
+					<valueAxisFormat>
+						<axisFormat/>
+					</valueAxisFormat>
+				</bar3DPlot>
+			</stackedBar3DChart>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

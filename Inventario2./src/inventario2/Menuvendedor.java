@@ -28,7 +28,7 @@ public class Menuvendedor extends javax.swing.JFrame {
         // this.setSize(720,310);
 
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+ this.setLocationRelativeTo(null);        
     }
 
     /**

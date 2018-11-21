@@ -6,9 +6,15 @@
 package inventario2;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,6 +26,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import javax.swing.table.DefaultTableModel;
 import net.sf.jasperreports.engine.JRException;
@@ -37,70 +44,82 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 public class Registro extends javax.swing.JFrame {
 
     Conexion con = new Conexion();
-   DefaultTableModel modeloBusqueda = new DefaultTableModel() {
-                public boolean isCellEditable(int rowIndex, int columnIndex) {
-                    return false;
-                }
-            };
+    DefaultTableModel modeloBusqueda = new DefaultTableModel() {
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return false;
+        }
+    };
+    DefaultTableModel modeloBusqueda2 = new DefaultTableModel() {
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return false;
+        }
+    };
     Connection Consulta = con.conexion();
-    private int año=0;
-    private int dia=0;
-    private int mes=0;
-    private int dia2=0;
-    private int año2=0;
-    private int mes2=0;
+        Connection cn = con.conexion();
+
+    private int año = 0;
+    private int dia = 0;
+    private int mes = 0;
+    private int dia2 = 0;
+    private int año2 = 0;
+    private int mes2 = 0;
+    private String idUsuario="";
+
     /**
      * Creates new form Registro
      */
     public Registro() {
         initComponents();
-                this.setTitle("Registro Compras - Sistema Inventario BTZ");
-    
-        AutoCompleteDecorator.decorate(Buscador);
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
+        this.setTitle("Registro Compras - Sistema Inventario BTZ");
+
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         //this.setSize(dim);
-        this.setLocation(dim.width/4-this.getSize().width/4, dim.height/10-this.getSize().height/10);
-        
-        Buscador.setVisible(false);
+ this.setLocationRelativeTo(null);        
+
+        //Buscador.setVisible(false);
         this.setResizable(false);
-        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
-        this.setSize(1200, 500);
-       
-      Todo.setSelected(true);
-          
-            
-            modeloBusqueda.addColumn("Fecha Compra");
-            modeloBusqueda.addColumn("Serie");
-            modeloBusqueda.addColumn("Número");
-            modeloBusqueda.addColumn("No. Lote");
-            modeloBusqueda.addColumn("Código");
-            modeloBusqueda.addColumn("Producto");
-            modeloBusqueda.addColumn("Marca");
-            modeloBusqueda.addColumn("Cantidad");
-            modeloBusqueda.addColumn("Unidad");
-            modeloBusqueda.addColumn("Precio Unitario");
-            modeloBusqueda.addColumn("Precio Total");
-            modeloBusqueda.addColumn("Nit");
-            modeloBusqueda.addColumn("Proveedor");
-            
-            
-            Lote.setModel(modeloBusqueda);
+        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
+        this.setSize(1350, 720);
 
-            String datos[] = new String[13];
+       // Todo.setSelected(true);
+        modeloBusqueda.addColumn("Admin");
+        modeloBusqueda.addColumn("Fecha Compra");
+        modeloBusqueda.addColumn("Fecha Transaccion");
+        modeloBusqueda.addColumn("Serie");
+        modeloBusqueda.addColumn("Número");
+        modeloBusqueda.addColumn("Cantidad");
+        modeloBusqueda.addColumn("Nit");
+        modeloBusqueda.addColumn("Proveedor");
+        modeloBusqueda.addColumn("Total Factura");
+        
+        modeloBusqueda2.addColumn("No Lote");
+        modeloBusqueda2.addColumn("Código");
+        modeloBusqueda2.addColumn("Cantidad");
+        modeloBusqueda2.addColumn("Medida");
+        modeloBusqueda2.addColumn("Nombre");
+        modeloBusqueda2.addColumn("Marca");
+        modeloBusqueda2.addColumn("C/U");
+        modeloBusqueda2.addColumn("C/T");
+        modeloBusqueda2.addColumn("% Ganancia");
+        modeloBusqueda2.addColumn("P/U ");
+        modeloBusqueda2.addColumn("P/T");
+        
+        Lote.setModel(modeloBusqueda);
+        Detalles.setModel(modeloBusqueda2);
 
-          try {
+        String datos[] = new String[10];
+
+        try {
 
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Codigo,P.Nombre,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id Order By L.Fecha");          
+            ResultSet Ca = sx.executeQuery("SELECT Y.Usuario,DATE_FORMAT(F.Fecha, \"%d/%m/%Y %H:%i:%s\"),DATE_FORMAT(F.Trans, \"%d/%m/%Y %H:%i:%s\"),F.Serie,F.Numero,F.Cantidad_Prod,"
+                    + "P.Nit,P.NombreV,F.Total_Factura "
+                    + "FROM FacturaCompra F Inner join Proveedor P "
+                    + "on P.id=F.Proveedor_id "
+                    + "inner join Usuarios Y "
+                    + "on Y.id=Usuarios_id where F.Anulado=false ORDER BY F.Fecha");
             while (Ca.next()) {
-               
+
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
                 datos[2] = Ca.getString(3);
@@ -110,26 +129,102 @@ public class Registro extends javax.swing.JFrame {
                 datos[6] = Ca.getString(7);
                 datos[7] = Ca.getString(8);
                 datos[8] = Ca.getString(9);
-                datos[9] = Ca.getString(10);
-                datos[10] = Ca.getString(11);
-                datos[11] = Ca.getString(12);
-                datos[12] = Ca.getString(13);
+
                 modeloBusqueda.addRow(datos);
-                
+
             }
             Lote.setModel(modeloBusqueda);
-            
+
         } catch (SQLException ex) {
             Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
         }
         Lote.setVisible(true);
         Lote.getColumn("Fecha Compra").setPreferredWidth(90);
         Lote.getColumn("Serie").setPreferredWidth(35);
-        Lote.getColumn("Número").setPreferredWidth(45);
-        Lote.getColumn("Precio Unitario").setPreferredWidth(100);
+        Lote.getColumn("Número").setPreferredWidth(50);
+        Lote.getColumn("Nit").setPreferredWidth(50);
+        //Lote.getColumn("Precio Unitario").setPreferredWidth(100);
+        Lote.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent Mouse_evt) {
+                //try{
+                JTable table = (JTable) Mouse_evt.getSource();
+                Point point = Mouse_evt.getPoint();
+                int row = table.rowAtPoint(point);
+                 int seleccionar = 0;
+                 seleccionar = Lote.getSelectedRow();
+                 if(seleccionar!=-1)
+                 {
+                if (Mouse_evt.getClickCount() == 2) {
+                    
+                    
+                    String Serie = String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 1+1+1));
+                    String Numero = String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 2+1+1));
+                    String Nit = String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 4+1+1));
+                    llenarDetalle(Serie,Numero,Nit);
+                    
+                }
+                 }
+                /*catch()
+                         {
+                 
+                 }*/
+            }
+        });
+             Lote.addKeyListener(new java.awt.event.KeyAdapter(){
+             public void keyReleased(java.awt.event.KeyEvent e)
+             {
+                 int seleccionar = 0;
+                 seleccionar = Lote.getSelectedRow();
+                 if(seleccionar!=-1)
+                 {
+                 String Serie = String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 1+1+1));
+                    String Numero = String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 2+1+1));
+                    String Nit = String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 4+1+1));
+                    llenarDetalle(Serie,Numero,Nit);
+                 }
+             }
+         
+         });
         
-    }
 
+    }
+   private void actualizar()
+    {       modeloBusqueda.setRowCount(0);
+            modeloBusqueda2.setRowCount(0);
+             String datos[] = new String[9];
+
+        try {
+
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT Y.Usuario,DATE_FORMAT(F.Fecha, \"%d/%m/%Y %H:%i:%s\"),DATE_FORMAT(F.Trans, \"%d/%m/%Y %H:%i:%s\"),F.Serie,F.Numero,F.Cantidad_Prod,"
+                    + "P.Nit,P.NombreV,F.Total_Factura "
+                    + "FROM FacturaCompra F Inner join Proveedor P "
+                    + "on P.id=F.Proveedor_id "
+                    + "inner join Usuarios Y "
+                    + "on Y.id=Usuarios_id where F.Anulado=false ORDER BY F.Fecha");
+            while (Ca.next()) {
+
+                datos[0] = Ca.getString(1);
+                datos[1] = Ca.getString(2);
+                datos[2] = Ca.getString(3);
+                datos[3] = Ca.getString(4);
+                datos[4] = Ca.getString(5);
+                datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+
+                modeloBusqueda.addRow(datos);
+
+            }
+            Lote.setModel(modeloBusqueda);
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            
+    }
+     
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -140,64 +235,36 @@ public class Registro extends javax.swing.JFrame {
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
-        jButton2 = new javax.swing.JButton();
-        Proveedor = new javax.swing.JRadioButton();
-        Inicio = new com.toedter.calendar.JDateChooser();
-        Final = new com.toedter.calendar.JDateChooser();
-        Inicio2 = new javax.swing.JLabel();
-        Final2 = new javax.swing.JLabel();
-        Buscador = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         Lote = new javax.swing.JTable();
-        Todo = new javax.swing.JRadioButton();
-        Marca = new javax.swing.JRadioButton();
-        Producto = new javax.swing.JRadioButton();
-        Codigo = new javax.swing.JRadioButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        Detalles = new javax.swing.JTable();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+
+        jMenuItem1.setText("Cancelar Factura");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(jMenuItem1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jPanel1.setBackground(new java.awt.Color(17, 111, 172));
+        jPanel1.setPreferredSize(new java.awt.Dimension(1420, 460));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jButton2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(255, 255, 255));
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconoso/icons8-multiedición-50.png"))); // NOI18N
-        jButton2.setText("Generar reporte");
-        jButton2.setContentAreaFilled(false);
-        jButton2.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/iconoso/icons8-multiedición-filled-50.png"))); // NOI18N
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 20, -1, -1));
-
-        Proveedor.setForeground(new java.awt.Color(255, 255, 255));
-        Proveedor.setText("Proveedor");
-        Proveedor.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ProveedorActionPerformed(evt);
-            }
-        });
-        jPanel1.add(Proveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 60, -1, -1));
-        jPanel1.add(Inicio, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 40, 139, -1));
-        jPanel1.add(Final, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 40, 140, -1));
-
-        Inicio2.setForeground(new java.awt.Color(255, 255, 255));
-        Inicio2.setText("Inicio");
-        jPanel1.add(Inicio2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
-
-        Final2.setForeground(new java.awt.Color(255, 255, 255));
-        Final2.setText("Final");
-        jPanel1.add(Final2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 40, -1, -1));
-
-        Buscador.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BuscadorActionPerformed(evt);
-            }
-        });
-        jPanel1.add(Buscador, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 60, 210, -1));
 
         Lote.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -210,6 +277,7 @@ public class Registro extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        Lote.setComponentPopupMenu(jPopupMenu1);
         Lote.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 LoteMouseClicked(evt);
@@ -217,82 +285,140 @@ public class Registro extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(Lote);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 1170, 350));
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 60, 1150, 290));
 
-        Todo.setForeground(new java.awt.Color(255, 255, 255));
-        Todo.setText("Todo");
-        Todo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TodoActionPerformed(evt);
+        Detalles.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
             }
-        });
-        jPanel1.add(Todo, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 20, -1, -1));
+        ));
+        jScrollPane2.setViewportView(Detalles);
 
-        Marca.setForeground(new java.awt.Color(255, 255, 255));
-        Marca.setText("Marca");
-        Marca.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                MarcaActionPerformed(evt);
-            }
-        });
-        jPanel1.add(Marca, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 20, -1, -1));
+        jPanel1.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 410, 1160, 260));
 
-        Producto.setForeground(new java.awt.Color(255, 255, 255));
-        Producto.setText("Producto");
-        Producto.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ProductoActionPerformed(evt);
-            }
-        });
-        jPanel1.add(Producto, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 20, -1, -1));
+        jPanel5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-        Codigo.setForeground(new java.awt.Color(255, 255, 255));
-        Codigo.setText("Código");
-        Codigo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                CodigoActionPerformed(evt);
-            }
-        });
-        jPanel1.add(Codigo, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 20, -1, -1));
+        jLabel6.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(1, 1, 1));
+        jLabel6.setText("Facturas");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(93, 93, 93)
+                .addComponent(jLabel6)
+                .addContainerGap(126, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel6)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel1.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 310, 40));
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel5.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(1, 1, 1));
+        jLabel5.setText("Detalles de Factura");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addContainerGap(89, Short.MAX_VALUE)
+                .addComponent(jLabel5)
+                .addGap(81, 81, 81))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel5)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel1.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 360, 370, 40));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 1242, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1340, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 476, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    private void llenarDetalle(String Serie,String Numero,String Nit)
+    {
+        String[] datos = new String[12];
+        modeloBusqueda2.setRowCount(0);
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("select L.NoLote,P.Codigo,L.Cantidadi,U.Medida,P.Nombre,P.Marca,L.CostoUnitario,L.CostoTotal,L.Ganancia,L.PrecioUnitario,L.PrecioTotal from UnidadMedida_1 U\n" +
+"inner join Producto P \n" +
+"on P.UnidadMedida_1_id=U.id\n" +
+"inner join Lote L\n" +
+"on P.id=L.Producto_id\n" +
+"inner join FacturaCompra F\n" +
+"on F.id=L.FacturaCompra_id\n" +
+"inner join Proveedor V\n" +
+"on V.id=F.Proveedor_id where V.Nit='"+Nit+"' && F.Numero='"+Numero+"' && F.Serie='"+Serie+"';");
+            while(Ca.next())
+            {
+                datos[0] = Ca.getString(1);
+                datos[1] = Ca.getString(2);
+                datos[2] = Ca.getString(3);
+                datos[3] = Ca.getString(4);
+                datos[4] = Ca.getString(5);
+                datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+                datos[9] = Ca.getString(10);
+                datos[10] = Ca.getString(11);
 
+                
+
+                modeloBusqueda2.addRow(datos);
+            }
+             Detalles.setModel(modeloBusqueda2);
+        } catch (SQLException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
     private void LoteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_LoteMouseClicked
         // TODO add your handling code here:
     }//GEN-LAST:event_LoteMouseClicked
-    private void brz()
-    {
-        String[] datos=new String[13];
+    private void brz() {
+        String[] datos = new String[7];
         modeloBusqueda.setRowCount(0);
         try {
 
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Codigo,P.Nombre,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id Order By L.Fecha");          
+            ResultSet Ca = sx.executeQuery("SELECT F.Fecha,F.Serie,F.Numero,F.Cantidad_Prod,"
+                    + "P.Nit,P.NombreV,F.Total_Factura "
+                    + "FROM FacturaCompra F Inner join Proveedor P "
+                    + "on P.id=F.Proveedor_id ORDER BY F.Fecha");
             while (Ca.next()) {
-               
+
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
                 datos[2] = Ca.getString(3);
@@ -300,700 +426,179 @@ public class Registro extends javax.swing.JFrame {
                 datos[4] = Ca.getString(5);
                 datos[5] = Ca.getString(6);
                 datos[6] = Ca.getString(7);
-                datos[7] = Ca.getString(8);
-                datos[8] = Ca.getString(9);
-                datos[9] = Ca.getString(10);
-                datos[10] = Ca.getString(11);
-                datos[11] = Ca.getString(12);
-                datos[12] = Ca.getString(13);
 
-              
-               
                 modeloBusqueda.addRow(datos);
-                
+
             }
             Lote.setModel(modeloBusqueda);
-            
+
         } catch (SQLException ex) {
             Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    private void ProveedorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProveedorActionPerformed
-        if (Proveedor.isSelected()) {
-            Todo.setSelected(false);
-            Codigo.setSelected(false);
-            Producto.setSelected(false);
-            Marca.setSelected(false);
-            Buscador.setVisible(true);
-            Llenar2("Cliente");
-            
-        } else {
-            Todo.setSelected(true);
-            Buscador.setVisible(false);
+
+    private Boolean construir(){
+        LoginView n=new LoginView(null,true);
+        new LoginController(n);
+        n.addWindowListener(new WindowAdapter(){
+             @Override
+             public void windowClosing(WindowEvent we )
+             {
+                 System.exit(0);
+             }
+        });
+        n.pack();
+        n.setLocationRelativeTo(null);
+        
+        n.setVisible(true);
+        idUsuario=n.getRol();
+        if(idUsuario.equals(""))
+        {
+            return false;
         }
-    }//GEN-LAST:event_ProveedorActionPerformed
-private void Llenar2(String Tipo) {
-        Buscador.removeAllItems();
+        else
+        {
+            return true;
+        }
+    }
+    private String idProveedor(String Nit)
+    {
+        String id="";
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("select id from Proveedor where Nit='"+Nit+"'");
+            while(Ca.next())
+            {
+                id=Ca.getString(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return id;
+    }
+    
+    private int idFacturaCancelar(String Serie,String Numero,String Nit)
+    {
+        int id=0;
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("select id from FacturaCompra Where Serie='"+Serie+"' && Numero='"+Numero+"' && Proveedor_id='"+idProveedor(Nit)+"'");
+            while(Ca.next())
+            {
+                id=Integer.valueOf(Ca.getString(1));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return id;
+    }
+    private void restarProducto(String id,String cantidad)
+    {
+        try {
+            PreparedStatement ActualizarProveedor = cn.prepareStatement("update Producto "
+                    + "set Existencia=Existencia-'"+cantidad+"' where id='" + id + "';");
+            ActualizarProveedor.executeUpdate();
+            ActualizarProveedor.close();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "Hubo un error en el proceso");
+
+        }
+    }
+    private void restarDeInventario(String id)
+    {
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT Producto_id,Cantidadi FROM Lote WHERE FacturaCompra_id='"+id+"'");
+            while(Ca.next())
+            {
+                restarProducto(Ca.getString(1),Ca.getString(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    private void anularDetalles(String id)
+    {
          try {
-            año = Inicio.getCalendar().get(Calendar.YEAR);
-            mes = Inicio.getCalendar().get(Calendar.MONTH) + 1;
-            dia = Inicio.getCalendar().get(Calendar.DAY_OF_MONTH);
-            año2 = Final.getCalendar().get(Calendar.YEAR);
-            mes2 = Final.getCalendar().get(Calendar.MONTH) + 1;
-            dia2 = Final.getCalendar().get(Calendar.DAY_OF_MONTH);
-        } catch (NullPointerException ex) {
-            Todo.setSelected(true);
-            Marca.setSelected(false);
-            Codigo.setSelected(false);
-            Producto.setSelected(false);
-            Proveedor.setSelected(false);
-            Buscador.setVisible(false);
-            
-        }
-        if (año == 0 || dia == 0 || mes == 00 || año2 == 0 || dia2 == 0 || mes2 == 00) {
-            JOptionPane.showMessageDialog(this, "Al menos selecciona una fecha válida!", "Error!", JOptionPane.INFORMATION_MESSAGE);
-            Todo.setSelected(true);
-            Marca.setSelected(false);
-            Codigo.setSelected(false);
-            Producto.setSelected(false);
-            Proveedor.setSelected(false);
-            Buscador.setVisible(false);
-
-        } 
-        else 
-        {
-                               
-            if (Tipo.equals("Cliente")) {
-                 String aux;
-                try {
-                    Statement sx = Consulta.createStatement();
-                    ResultSet Ca = sx.executeQuery("select V.Nit\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id");
-                    while (Ca.next()) {
-                        aux=Ca.getString(1);
-                        if(Buscador.getItemCount()==0)
-                        {
-                            Buscador.addItem(aux);
-                        }
-                        else
-                        {
-                            Boolean Valor=false;
-                            for (int i = 0; i < Buscador.getItemCount(); i++) {
-                                if(aux.equals(Buscador.getItemAt(i)))
-                                {
-                                    Valor=true;
-                                }
-                        }
-                        if(Valor==false)
-                        {
-                            Buscador.addItem(aux); 
-                        }
-
-                        }
-                
-                    }
+                    PreparedStatement ActualizarProveedor = cn.prepareStatement("update Lote "                 
+                    + "set Anulado=true,Disponible=false where FacturaCompra_id='"+id+"';");
+                    ActualizarProveedor.executeUpdate();
+                    ActualizarProveedor.close();
+                   restarDeInventario(id);
+                   
                 } catch (SQLException ex) {
                     Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(null, "Hubo un error en el proceso");
+
                 }
-            }
-            if (Tipo.equals("Codigo")) {
-                String aux;
-                try {
-                    Statement sx = Consulta.createStatement();
-                    ResultSet Ca = sx.executeQuery(""
-                            + "select P.Codigo\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id");
-                    while (Ca.next()) {
-                        aux=Ca.getString(1);
-                        if(Buscador.getItemCount()==0)
-                        {
-                            Buscador.addItem(aux);
-                        }
-                        else
-                        {
-                            Boolean Valor=false;
-                            for (int i = 0; i < Buscador.getItemCount(); i++) {
-                                if(aux.equals(Buscador.getItemAt(i)))
-                                {
-                                    Valor=true;
-                                }
-                        }
-                        if(Valor==false)
-                        {
-                            Buscador.addItem(aux); 
-                        }
-
-                        }
-                
-                    }
-                } catch (SQLException ex) {
-                    Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
-                }
-               
-            }
-            if (Tipo.equals("Producto")) {
-                String aux;
-                try {
-                    Statement sx = Consulta.createStatement();
-                    ResultSet Ca = sx.executeQuery("select P.Nombre\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id");
-                    while (Ca.next()) {
-                        aux=Ca.getString(1);
-                        if(Buscador.getItemCount()==0)
-                        {
-                            Buscador.addItem(aux);
-                        }
-                        else
-                        {
-                            Boolean Valor=false;
-                            for (int i = 0; i < Buscador.getItemCount(); i++) {
-                                if(aux.equals(Buscador.getItemAt(i)))
-                                {
-                                    Valor=true;
-                                }
-                        }
-                        if(Valor==false)
-                        {
-                            Buscador.addItem(aux); 
-                        }
-
-                        }
-                
-                    }
-                } catch (SQLException ex) {
-                    Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            if (Tipo.equals("Marca")) {
-                String aux;
-                try {
-                    Statement sx = Consulta.createStatement();
-                    ResultSet Ca = sx.executeQuery("select P.Marca\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id");
-                    while (Ca.next()) {
-                        aux=Ca.getString(1);
-                        if(Buscador.getItemCount()==0)
-                        {
-                            Buscador.addItem(aux);
-                        }
-                        else
-                        {
-                            Boolean Valor=false;
-                            for (int i = 0; i < Buscador.getItemCount(); i++) {
-                                if(aux.equals(Buscador.getItemAt(i)))
-                                {
-                                    Valor=true;
-                                }
-                        }
-                        if(Valor==false)
-                        {
-                            Buscador.addItem(aux); 
-                        }
-
-                        }
-                
-                    }
-                } catch (SQLException ex) {
-                    Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+         
+         
+         
     }
-    private void BuscadorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BuscadorActionPerformed
-        try {
-            año = Inicio.getCalendar().get(Calendar.YEAR);
-            mes = Inicio.getCalendar().get(Calendar.MONTH) + 1;
-            dia = Inicio.getCalendar().get(Calendar.DAY_OF_MONTH);
-            año2 = Final.getCalendar().get(Calendar.YEAR);
-            mes2 = Final.getCalendar().get(Calendar.MONTH) + 1;
-            dia2 = Final.getCalendar().get(Calendar.DAY_OF_MONTH);
-        } catch (NullPointerException ex) {
-                      
-        }
-        if(Proveedor.isSelected())
-        {
-            String F1=año+"-"+mes+"-"+dia;
-            String F2=año2+"-"+mes2+"-"+dia2;
-            Clientes((String) Buscador.getSelectedItem(),F1,F2);
-        }
-        if(Codigo.isSelected())
-        {
-            String F1=año+"-"+mes+"-"+dia;
-            String F2=año2+"-"+mes2+"-"+dia2;
-            Codigo((String) Buscador.getSelectedItem(),F1,F2);
-        }
-        if(Producto.isSelected())
-        {
-            String F1=año+"-"+mes+"-"+dia;
-            String F2=año2+"-"+mes2+"-"+dia2;
-           Producto((String) Buscador.getSelectedItem(),F1,F2);
-        }
-        if(Marca.isSelected())
-        {
-            String F1=año+"-"+mes+"-"+dia;
-            String F2=año2+"-"+mes2+"-"+dia2;
-            Marca((String) Buscador.getSelectedItem(),F1,F2);
-        }
-        
-        // TODO add your handling code here:
-    }//GEN-LAST:event_BuscadorActionPerformed
-    private void Clientes(String Nit,String F1,String F2)
+    private void anularFactura(String id,String idAdmin)
     {
-        modeloBusqueda.setRowCount(0);
-        
-        String datos[] = new String[13];
-        
-        try {
-            
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Codigo,P.Nombre,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id where V.Nit='"+Nit+"' && L.Fecha BETWEEN '"+F1+"' and '"+F2+"'  Order By L.Fecha ");
-            
-            while (Ca.next()) {
-                
-                datos[0] = Ca.getString(1);
-                datos[1] = Ca.getString(2);
-                datos[2] = Ca.getString(3);
-                datos[3] = Ca.getString(4);
-                datos[4] = Ca.getString(5);
-                datos[5] = Ca.getString(6);
-                datos[6] = Ca.getString(7);
-                datos[7] = Ca.getString(8);
-                datos[8] = Ca.getString(9);
-                datos[9] = Ca.getString(10);
-                datos[10] = Ca.getString(11);
-                datos[11] = Ca.getString(12);
-                datos[12] = Ca.getString(13);
-                modeloBusqueda.addRow(datos);
-                
-            }
-            Lote.setModel(modeloBusqueda);
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
-        }
-   }
- 
-    private void Codigo(String Nit,String F1,String F2)
-    {
-        modeloBusqueda.setRowCount(0);
-        
-        String datos[] = new String[13];
-        
-        try {
-            
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Codigo,P.Nombre,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id where P.Codigo='"+Nit+"' && L.Fecha BETWEEN '"+F1+"' and '"+F2+"'  Order By L.Fecha ");
-            
-            while (Ca.next()) {
-                
-                datos[0] = Ca.getString(1);
-                datos[1] = Ca.getString(2);
-                datos[2] = Ca.getString(3);
-                datos[3] = Ca.getString(4);
-                datos[4] = Ca.getString(5);
-                datos[5] = Ca.getString(6);
-                datos[6] = Ca.getString(7);
-                datos[7] = Ca.getString(8);
-                datos[8] = Ca.getString(9);
-                datos[9] = Ca.getString(10);
-                datos[10] = Ca.getString(11);
-                datos[11] = Ca.getString(12);
-                datos[12] = Ca.getString(13);
-                modeloBusqueda.addRow(datos);
-                
-            }
-            Lote.setModel(modeloBusqueda);
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
-        }
-   }
- 
-    private void Producto(String Nit,String F1,String F2)
-    {
-        modeloBusqueda.setRowCount(0);
-        
-        String datos[] = new String[13];
-        
-        try {
-            
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Codigo,P.Nombre,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id where P.Nombre='"+Nit+"' && L.Fecha BETWEEN '"+F1+"' and '"+F2+"'  Order By L.Fecha ");
-            
-            while (Ca.next()) {
-                
-                datos[0] = Ca.getString(1);
-                datos[1] = Ca.getString(2);
-                datos[2] = Ca.getString(3);
-                datos[3] = Ca.getString(4);
-                datos[4] = Ca.getString(5);
-                datos[5] = Ca.getString(6);
-                datos[6] = Ca.getString(7);
-                datos[7] = Ca.getString(8);
-                datos[8] = Ca.getString(9);
-                datos[9] = Ca.getString(10);
-                datos[10] = Ca.getString(11);
-                datos[11] = Ca.getString(12);
-                datos[12] = Ca.getString(13);
-                modeloBusqueda.addRow(datos);
-                
-            }
-            Lote.setModel(modeloBusqueda);
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
-        }
-   }
- 
-    private void Marca(String Nit,String F1,String F2)
-    {
-        modeloBusqueda.setRowCount(0);
-        
-        String datos[] = new String[13];
-        
-        try {
-            
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Codigo,P.Nombre,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV\n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id where P.Marca='"+Nit+"' && L.Fecha BETWEEN '"+F1+"' and '"+F2+"'  Order By L.Fecha ");
-            
-            while (Ca.next()) {
-                
-                datos[0] = Ca.getString(1);
-                datos[1] = Ca.getString(2);
-                datos[2] = Ca.getString(3);
-                datos[3] = Ca.getString(4);
-                datos[4] = Ca.getString(5);
-                datos[5] = Ca.getString(6);
-                datos[6] = Ca.getString(7);
-                datos[7] = Ca.getString(8);
-                datos[8] = Ca.getString(9);
-                datos[9] = Ca.getString(10);
-                datos[10] = Ca.getString(11);
-                datos[11] = Ca.getString(12);
-                datos[12] = Ca.getString(13);
-                modeloBusqueda.addRow(datos);
-                
-            }
-            Lote.setModel(modeloBusqueda);
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
-        }
-   }
- private void Reporte_Cliente(String Nombre){
-     
-        try {
-            Date uno=new Date(año-1900,mes-1,dia);
-            Date dos=new Date(año2-1900,mes2-1,dia2);
-            Connection tr = con.conexion();
-            JasperReport reporte = null;
-            String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "RegistroCompras_Cliente.jasper";
-            Map parametro = new HashMap();
-            parametro.put("Nit", Nombre);
-            parametro.put("Fecha1",uno);
-            parametro.put("Fecha2",dos);
-            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
-            JasperPrint jprint = JasperFillManager.fillReport(reporte, parametro, tr);
-            JasperViewer view = new JasperViewer(jprint, false);
-            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            view.setVisible(true);
-
-            // TODO add your handling code here:
-        } catch (JRException ex) {
-            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-      private void Reporte_Producto(String Nombre){
-     
-        try {
-            Date uno=new Date(año-1900,mes-1,dia);
-            Date dos=new Date(año2-1900,mes2-1,dia2);
-            Connection tr = con.conexion();
-            JasperReport reporte = null;
-            String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "RegistroCompras_Producto.jasper";
-            Map parametro = new HashMap();
-            parametro.put("Nit", Nombre);
-            parametro.put("Fecha1",uno);
-            parametro.put("Fecha2",dos);
-            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
-            JasperPrint jprint = JasperFillManager.fillReport(reporte, parametro, tr);
-            JasperViewer view = new JasperViewer(jprint, false);
-            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            view.setVisible(true);
-
-            // TODO add your handling code here:
-        } catch (JRException ex) {
-            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-   
-      private void Reporte_Codigo(String Nombre){
-     
-        try {
-            Date uno=new Date(año-1900,mes-1,dia);
-            Date dos=new Date(año2-1900,mes2-1,dia2);
-            Connection tr = con.conexion();
-            JasperReport reporte = null;
-            String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "RegistroCompras_Codigo.jasper";
-            Map parametro = new HashMap();
-            parametro.put("Nit", Nombre);
-            parametro.put("Fecha1",uno);
-            parametro.put("Fecha2",dos);
-            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
-            JasperPrint jprint = JasperFillManager.fillReport(reporte, parametro, tr);
-            JasperViewer view = new JasperViewer(jprint, false);
-            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            view.setVisible(true);
-
-            // TODO add your handling code here:
-        } catch (JRException ex) {
-            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-   
-      private void Reporte_Marca(String Nombre){
-     
-        try {
-            Date uno=new Date(año-1900,mes-1,dia);
-            Date dos=new Date(año2-1900,mes2-1,dia2);
-            Connection tr = con.conexion();
-            JasperReport reporte = null;
-            String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "RegistroCompras_Marca.jasper";
-            Map parametro = new HashMap();
-            parametro.put("Nit", Nombre);
-            parametro.put("Fecha1",uno);
-            parametro.put("Fecha2",dos);
-            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
-            JasperPrint jprint = JasperFillManager.fillReport(reporte, parametro, tr);
-            JasperViewer view = new JasperViewer(jprint, false);
-            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            view.setVisible(true);
-
-            // TODO add your handling code here:
-        } catch (JRException ex) {
-            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-      private void Reporte(String g){
-        try {
-           
-            Connection tr = con.conexion();
-            JasperReport reporte = null;
-            String ruta = System.getProperty("user.dir");
-            ruta = ruta + System.getProperty("file.separator") + "src" + System.getProperty("file.separator") + "Reportes" + System.getProperty("file.separator") + "RegistroCompras.jasper";
-            
-            reporte = (JasperReport) JRLoader.loadObjectFromFile(ruta);
-            JasperPrint jprint = JasperFillManager.fillReport(reporte, null, tr);
-            JasperViewer view = new JasperViewer(jprint, false);
-            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            view.setVisible(true);
-
-            // TODO add your handling code here:
-        } catch (JRException ex) {
-            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-          if(Proveedor.isSelected())
-        {
-           Reporte_Cliente((String)Buscador.getSelectedItem());
-        }
-        if(Codigo.isSelected())
-        {
-          Reporte_Codigo((String)Buscador.getSelectedItem());
-        }
-        if(Producto.isSelected())
-        {
-            Reporte_Producto((String)Buscador.getSelectedItem());
-        }
-        if(Marca.isSelected())
-        {
-            Reporte_Marca((String)Buscador.getSelectedItem());
-        }
-        if(Todo.isSelected())
-        {
-            Reporte((String)Buscador.getSelectedItem());
-        }
-        
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void TodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TodoActionPerformed
-        if (Todo.isSelected()) {
-            Proveedor.setSelected(false);
-            Producto.setSelected(false);
-            Codigo.setSelected(false);
-            Marca.setSelected(false);
-            Buscador.setVisible(false);
-            brz();
-        } else {
-            Todo.setSelected(true);
-        }
-
-    }//GEN-LAST:event_TodoActionPerformed
-
-    private void MarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MarcaActionPerformed
-        if (Marca.isSelected()) {
-            Todo.setSelected(false);
-            Proveedor.setSelected(false);
-            Producto.setSelected(false);
-            Codigo.setSelected(false);
-            Buscador.setVisible(true);
-            Llenar2("Marca");
-            
-        } else {
-            Todo.setSelected(true);
-            Buscador.setVisible(false);
-        }// TODO add your handling code here:
-    }//GEN-LAST:event_MarcaActionPerformed
-
-    private void ProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductoActionPerformed
-        if (Producto.isSelected()) {
-            Todo.setSelected(false);
-            Proveedor.setSelected(false);
-            Codigo.setSelected(false);
-            Marca.setSelected(false);
-            Buscador.setVisible(true);
-            Llenar2("Producto");
-        } else {
-            Todo.setSelected(true);
-            Buscador.setVisible(false);
-        }// TODO add your handling code here:
-    }//GEN-LAST:event_ProductoActionPerformed
-
-    private void CodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CodigoActionPerformed
-if (Codigo.isSelected()) {
-            Todo.setSelected(false);
-            Proveedor.setSelected(false);
-            Producto.setSelected(false);
-            Marca.setSelected(false);
-            Buscador.setVisible(true);
-            Llenar2("Codigo");
-            
-        } else {
-            Todo.setSelected(true);
-            Buscador.setVisible(false);
-            
-        }
-        
-        // TODO add your handling code here:
-    }//GEN-LAST:event_CodigoActionPerformed
-    private void llenar2(String B)
-    {
-          modeloBusqueda.setRowCount(0);
-        String datos[]=new String[13];
          try {
+                    PreparedStatement ActualizarProveedor = cn.prepareStatement("update FacturaCompra "                 
+                    + "set Anulado=true,FechaAnulado=now(),Usuarios_id1='"+idAdmin+"'  where id='"+id+"';");
+                    ActualizarProveedor.executeUpdate();
+                    ActualizarProveedor.close();
+                   
+                   
+                } catch (SQLException ex) {
+                    Logger.getLogger(Inventario.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(null, "Hubo un error en el proceso");
 
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Codigo,P.Nombre,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV \n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id where P.Codigo='"+B+"'&& L.Fecha BETWEEN '"+año+"-"+mes+"-"+dia+"' AND '"+año2+"-"+mes2+"-"+dia2+"' Order By L.Fecha");          
-            while (Ca.next()) {
-               
-                datos[0] = Ca.getString(1);
-                datos[1] = Ca.getString(2);
-                datos[2] = Ca.getString(3);
-                datos[3] = Ca.getString(4);
-                datos[4] = Ca.getString(5);
-                datos[5] = Ca.getString(6);
-                datos[6] = Ca.getString(7);
-                datos[7] = Ca.getString(8);
-                datos[8] = Ca.getString(9);
-                datos[9] = Ca.getString(10);
-                datos[10] = Ca.getString(11);
-                datos[11] = Ca.getString(12);
-                datos[12] = Ca.getString(13);
-                modeloBusqueda.addRow(datos);
-                
-            }
-            Lote.setModel(modeloBusqueda);
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
-        }
+                }
     }
-    private void Llenar(String B)
-    {
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        int seleccionar = 0;
+        seleccionar = Lote.getSelectedRow();
+       
+        if (seleccionar == -1) {
+            JOptionPane.showMessageDialog(null, "Seleccione Una Factura");
+        } else {
+          if(construir())
+          {
+              String serie=String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 1+1+1));
+              String numero=String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 2+1+1));
+              String nit=String.valueOf(Lote.getValueAt(Lote.getSelectedRow(), 4+1+1));
+              String id=String.valueOf(idFacturaCancelar(serie,numero,nit));
+              anularFactura(id,idUsuario);
+              anularDetalles(id);
+               JOptionPane.showMessageDialog(null, "FacturaAnulada");
+               actualizar();
+          }
+          else
+          {
+              JOptionPane.showMessageDialog(null, "Acceso Denegado");
+          }
+        }
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+ submenucompras n=new submenucompras();
+        n.setVisible(true);
+        dispose();        // TODO add your handling code here:
+    }//GEN-LAST:event_formWindowClosing
+    private void llenar2(String B) {
         modeloBusqueda.setRowCount(0);
-        String datos[]=new String[13];
-         try {
+        String datos[] = new String[13];
+        try {
 
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Nombre,P.Codigo,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV \n" +
-"FROM Producto P \n" +
-"inner JOIN Lote L \n" +
-"on P.id=L.Producto_id \n" +
-"inner JOIN FacturaCompra C \n" +
-"on C.id=L.FacturaCompra_id\n" +
-"inner JOIN Proveedor V \n" +
-"on V.id=C.Proveedor_id where V.Nit='"+B+"'&& L.Fecha BETWEEN '"+año+"-"+mes+"-"+dia+"' AND '"+año2+"-"+mes2+"-"+dia2+"' Order By L.Fecha");          
+            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Codigo,P.Nombre,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV \n"
+                    + "FROM Producto P \n"
+                    + "inner JOIN Lote L \n"
+                    + "on P.id=L.Producto_id \n"
+                    + "inner JOIN FacturaCompra C \n"
+                    + "on C.id=L.FacturaCompra_id\n"
+                    + "inner JOIN Proveedor V \n"
+                    + "on V.id=C.Proveedor_id where P.Codigo='" + B + "'&& L.Fecha BETWEEN '" + año + "-" + mes + "-" + dia + "' AND '" + año2 + "-" + mes2 + "-" + dia2 + "' Order By L.Fecha");
             while (Ca.next()) {
-               
+
                 datos[0] = Ca.getString(1);
                 datos[1] = Ca.getString(2);
                 datos[2] = Ca.getString(3);
@@ -1007,16 +612,56 @@ if (Codigo.isSelected()) {
                 datos[10] = Ca.getString(11);
                 datos[11] = Ca.getString(12);
                 datos[12] = Ca.getString(13);
-               
                 modeloBusqueda.addRow(datos);
-                
+
             }
             Lote.setModel(modeloBusqueda);
-            
+
         } catch (SQLException ex) {
             Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    private void Llenar(String B) {
+        modeloBusqueda.setRowCount(0);
+        String datos[] = new String[13];
+        try {
+
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT L.Fecha,C.Serie,C.Numero,L.NoLote,P.Nombre,P.Codigo,P.Marca,L.Cantidadi,P.Medida,L.PrecioUnitario,L.PrecioTotal,V.Nit,V.NombreV \n"
+                    + "FROM Producto P \n"
+                    + "inner JOIN Lote L \n"
+                    + "on P.id=L.Producto_id \n"
+                    + "inner JOIN FacturaCompra C \n"
+                    + "on C.id=L.FacturaCompra_id\n"
+                    + "inner JOIN Proveedor V \n"
+                    + "on V.id=C.Proveedor_id where V.Nit='" + B + "'&& L.Fecha BETWEEN '" + año + "-" + mes + "-" + dia + "' AND '" + año2 + "-" + mes2 + "-" + dia2 + "' Order By L.Fecha");
+            while (Ca.next()) {
+
+                datos[0] = Ca.getString(1);
+                datos[1] = Ca.getString(2);
+                datos[2] = Ca.getString(3);
+                datos[3] = Ca.getString(4);
+                datos[4] = Ca.getString(5);
+                datos[5] = Ca.getString(6);
+                datos[6] = Ca.getString(7);
+                datos[7] = Ca.getString(8);
+                datos[8] = Ca.getString(9);
+                datos[9] = Ca.getString(10);
+                datos[10] = Ca.getString(11);
+                datos[11] = Ca.getString(12);
+                datos[12] = Ca.getString(13);
+
+                modeloBusqueda.addRow(datos);
+
+            }
+            Lote.setModel(modeloBusqueda);
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -1053,20 +698,17 @@ if (Codigo.isSelected()) {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> Buscador;
-    private javax.swing.JRadioButton Codigo;
-    private com.toedter.calendar.JDateChooser Final;
-    private javax.swing.JLabel Final2;
-    private com.toedter.calendar.JDateChooser Inicio;
-    private javax.swing.JLabel Inicio2;
+    private javax.swing.JTable Detalles;
     private javax.swing.JTable Lote;
-    private javax.swing.JRadioButton Marca;
-    private javax.swing.JRadioButton Producto;
-    private javax.swing.JRadioButton Proveedor;
-    private javax.swing.JRadioButton Todo;
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }

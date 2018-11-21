@@ -29,7 +29,7 @@ public class FormatoTabla extends DefaultTableCellRenderer{
         setBackground(Color.white);//color de fondo
         table.setForeground(Color.black);//color de texto
         //Si la celda corresponde a una fila con estado FALSE, se cambia el color de fondo a rojo
-        if( Integer.parseInt(String.valueOf(table.getValueAt(row,4)))<=Integer.parseInt(String.valueOf(table.getValueAt(row,5))))
+        if( Integer.parseInt(String.valueOf(table.getValueAt(row,6)))<=Integer.parseInt(String.valueOf(table.getValueAt(row,7))))
         {
             setBackground(Color.red);
         }

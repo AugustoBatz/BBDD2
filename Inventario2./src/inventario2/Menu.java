@@ -15,21 +15,19 @@ import javax.swing.JOptionPane;
  */
 public class Menu extends javax.swing.JFrame {
 
-    
-
     /**
      * Creates new form Menu
      */
     public Menu() {
         initComponents();
         this.setResizable(false);
-       this.setTitle("Menu Principal - Sistema Inventario BTZ");
-                
-         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
+        this.setTitle("Menu Principal - Sistema Inventario BTZ");
+
+        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
         // this.setSize(720,310);
 
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+ this.setLocationRelativeTo(null);        
     }
 
     /**
@@ -50,6 +48,8 @@ public class Menu extends javax.swing.JFrame {
         botonprov = new javax.swing.JButton();
         botonrh = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        Almacen = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -145,12 +145,26 @@ public class Menu extends javax.swing.JFrame {
                 botonrhActionPerformed(evt);
             }
         });
-        jPanel2.add(botonrh, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 260, -1, 110));
+        jPanel2.add(botonrh, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 250, -1, 110));
 
         jLabel5.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel5.setText("Recursos Humanos");
-        jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 220, -1, -1));
+        jLabel5.setText("Almacen");
+        jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 370, -1, -1));
+
+        jLabel6.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel6.setText("Recursos Humanos");
+        jPanel2.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 220, -1, -1));
+
+        Almacen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconoso/icons8-almacén-80.png"))); // NOI18N
+        Almacen.setContentAreaFilled(false);
+        Almacen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AlmacenActionPerformed(evt);
+            }
+        });
+        jPanel2.add(Almacen, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 400, 80, -1));
 
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 820, 550));
 
@@ -162,27 +176,27 @@ public class Menu extends javax.swing.JFrame {
         s.setVisible(true);
         dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
-   
+
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 //        SubCompras trd = new SubCompras();
-  //      trd.setVisible(true); // TODO add your handling code here:
-    //    dispose();
-    
-    submenucompras sb = new submenucompras();
-    sb.setVisible(true);
-    dispose();
+        //      trd.setVisible(true); // TODO add your handling code here:
+        //    dispose();
+
+        submenucompras sb = new submenucompras();
+        sb.setVisible(true);
+        dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-          log x=new log();
-            x.setVisible(true);
-            dispose();   // TODO add your handling code here:
+        log x = new log();
+        x.setVisible(true);
+        dispose();   // TODO add your handling code here:
     }//GEN-LAST:event_formWindowClosing
 
     private void botonventaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonventaActionPerformed
-      SubVentas x=new SubVentas();
-      x.setVisible(true);
-      dispose();// TODO add your handling code here:
+        SubVentas x = new SubVentas();
+        x.setVisible(true);
+        dispose();// TODO add your handling code here:
     }//GEN-LAST:event_botonventaActionPerformed
 
     private void botonclientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonclientesActionPerformed
@@ -211,6 +225,12 @@ public class Menu extends javax.swing.JFrame {
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
     }//GEN-LAST:event_formWindowClosed
+
+    private void AlmacenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AlmacenActionPerformed
+        Almacen2 alma = new Almacen2();
+        alma.setVisible(true);
+        dispose();
+    }//GEN-LAST:event_AlmacenActionPerformed
 
     /**
      * @param args the command line arguments
@@ -248,6 +268,7 @@ public class Menu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Almacen;
     private javax.swing.JButton botonclientes;
     private javax.swing.JButton botonprov;
     private javax.swing.JButton botonrh;
@@ -256,6 +277,7 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables
 }

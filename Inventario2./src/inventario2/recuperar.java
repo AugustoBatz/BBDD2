@@ -5,15 +5,19 @@
  */
 package inventario2;
 
+
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Random;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import javax.swing.JOptionPane;
 /**
  *
  * @author chr97lubuntu
@@ -23,14 +27,15 @@ Conexion con = new Conexion();
    
     Connection Consulta = con.conexion();
     boolean verificado;
+    Correo c=new Correo();
     /**
      * Creates new form recuperar
      */
     public recuperar() {
         initComponents();
-          this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
-           Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocationRelativeTo(null);
     }
 
     /**
@@ -43,47 +48,21 @@ Conexion con = new Conexion();
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        admin = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
-        passadmin = new javax.swing.JPasswordField();
         jLabel3 = new javax.swing.JLabel();
-        usuario = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
+        DPI = new javax.swing.JTextField();
         recordar = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(17, 111, 172));
-        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("Usuario administrador");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, -1, -1));
-        jPanel1.add(admin, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 200, -1));
-
-        jLabel2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("Contraseña administrador");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 210, -1));
-        jPanel1.add(passadmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 200, -1));
 
         jLabel3.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel3.setText("Usuario");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, 190, -1));
-        jPanel1.add(usuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 170, 200, -1));
-
-        jLabel4.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("Contraseña: ");
-        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 270, -1, -1));
+        jLabel3.setText("Número de DPI DPI");
 
         recordar.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         recordar.setForeground(new java.awt.Color(255, 255, 255));
-        jPanel1.add(recordar, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 300, 200, 20));
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 11)); // NOI18N
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
@@ -96,103 +75,135 @@ Conexion con = new Conexion();
                 jButton1ActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 200, -1, -1));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(DPI, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButton1)
+                            .addComponent(recordar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(23, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(40, 40, 40)
+                .addComponent(jLabel3)
+                .addGap(13, 13, 13)
+                .addComponent(DPI, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton1)
+                .addGap(126, 126, 126)
+                .addComponent(recordar, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 243, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        String adminis = admin.getText();
-        char claves[]=passadmin.getPassword();
-        String clavedef=new String(claves);
+    private String crearNuevaContraseña()
+    {
+        String[] abecedario = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+            "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", 
+            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", ""
+                + "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3"
+        , "4", "5", "6", "7", "8", "9", "0", "+", "-", "*"};
         
-        
-        String puest=" ";
-        
-        try{
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Usuario, Contraseña, Privilegios FROM Usuarios");
-            while (Ca.next()) {
-               // System.out.println(Ca.getString(1)+" -- "+Ca.getString(2));
-               // System.out.println(us+"***"+clavedef);
-               if((adminis.equals(Ca.getString(1)))&&(clavedef.equals(Ca.getString(2)))){
-                   verificado=true;
-                   //System.out.println("entre");
-                   puest=Ca.getString(3);
-               }
-                              
-            }
+        String n="";
+        System.out.println("Largi= "+abecedario.length);
+        for (int i = 0; i < 10; i++) {
             
-        }catch(SQLException ex){
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+            int numRandon = (int) Math.round(Math.random() * (abecedario.length-1));
+            System.out.println("num "+numRandon);
+            n=n+abecedario[numRandon];
         }
-        if(verificado==true){
-           // System.out.println("Bienvenido "+us);
-            if(puest.equals("Vendedor")){
-            sinpermisos sp = new sinpermisos();
-            sp.setVisible(true);
-            }
-            else{
-               String nueva = contra(usuario.getText());
-                
-               if(nueva.equals("")){
-                   
-               }
-               else{
-                   recordar.setVisible(false);
-                   recordar.setText(nueva);
-                   recordar.setVisible(true);
-               }
-            }
-            
-        }
-        else{
-           // JOptionPane.showMessageDialog(null, "Datos incorrectos");
-            //System.out.println("no");
-            //JOptionPane.showMessageDialog(null," Aprendiendo a poner imagenes ", "Imagen Java", JOptionPane.PLAIN_MESSAGE, icono);
-           inva in = new inva();
-           in.setVisible(true);
-        }
-        
-        
-        
-        
-        
-        
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    public String contra(String us){
-        String st = "";
-        
-          try{
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Contraseña, Privilegios FROM Usuarios where Usuario='"+us+"'");
-            while (Ca.next()) {
-               // System.out.println(Ca.getString(1)+" -- "+Ca.getString(2));
-               st=Ca.getString(1);
-                              
-            }
-            
-        }catch(SQLException ex){
-            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        
-        return st;
-        
+        return n;
+    }  
+    private void cambiar(String nuevo)
+    {
+    try {
+        PreparedStatement ActualizarProveedor = Consulta.prepareStatement("UPDATE Usuarios SET Contraseña='" + nuevo + "' where DPI= '"+DPI.getText()+ "'");
+        ActualizarProveedor.executeUpdate();
+    } catch (SQLException ex) {
+        Logger.getLogger(recuperar.class.getName()).log(Level.SEVERE, null, ex);
     }
+    }
+    private void enviarCorreo()
+    {   String n=crearNuevaContraseña();
+        System.out.println("N "+n);
+        cambiar(n);
+        c.setContraseña("ijsxmonhovlaqnjg");
+        c.setUsuario("inventariopeps@gmail.com");
+        c.setAsunto("Recuperar Contraseña");
+        c.setMensaje("DPI: "+DPI.getText()+ " \n"
+                + "Su nueva contraseña es: "+n);
+        c.setDestino("miguelbatz2@gmail.com");
+        Controlador cc=new Controlador();
+        if(cc.enviarCorre(c))
+        {
+            JOptionPane.showMessageDialog(null, "Su Constraseña se envio al correo del admin");
+        }
+        else
+        {
+            
+        }
+    }
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        if(DPI.getText().equals(""))
+        {
+            JOptionPane.showMessageDialog(null, "Ingrese su Número de DPI");
+        }
+        else
+        {
+            if(DPICorrecto())
+            {
+                enviarCorreo();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "DPI no valido");
+            }
+        }
+      
+    }//GEN-LAST:event_jButton1ActionPerformed
+    
+    private Boolean DPICorrecto()
+    {
+        Boolean valor=false;
+    try {
+        Statement sx = Consulta.createStatement();
+        ResultSet Ca = sx.executeQuery("select id from Usuarios where DPI='"+DPI.getText()+"'");
+        while(Ca.next())
+        {
+             valor= true;
+        }
+       
+    } catch (SQLException ex) {
+        Logger.getLogger(recuperar.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return valor;
+    }
+   
     /**
      * @param args the command line arguments
      */
@@ -229,15 +240,16 @@ Conexion con = new Conexion();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField admin;
+    private javax.swing.JTextField DPI;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPasswordField passadmin;
     private javax.swing.JLabel recordar;
-    private javax.swing.JTextField usuario;
     // End of variables declaration//GEN-END:variables
+
+    private static class Random {
+
+        public Random() {
+        }
+    }
 }

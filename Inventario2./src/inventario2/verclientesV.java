@@ -42,7 +42,8 @@ public class verclientesV extends javax.swing.JFrame {
     public verclientesV() {
         initComponents();
         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
-      
+       this.setLocationRelativeTo(null);        
+
         
         DefaultTableModel modelo=new DefaultTableModel(){
             public boolean isCellEditable(int rowIndex, int columnIndex) {

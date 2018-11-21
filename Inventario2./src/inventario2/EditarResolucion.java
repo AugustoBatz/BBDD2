@@ -41,6 +41,8 @@ public class EditarResolucion extends javax.swing.JFrame {
     public EditarResolucion(String x[]) {
         initComponents();
         this.setTitle("Editar Resolución - Sistema Inventario BTZ");
+         this.setLocationRelativeTo(null);        
+
         Serie.setText(x[0]);
         Final.setText(x[2]);
         Inicio.setText(x[1]);
@@ -123,8 +125,6 @@ public class EditarResolucion extends javax.swing.JFrame {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Editar Resolución");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 480, -1));
-
-        Fecha.setDateFormatString("yyyy-MM-d");
         jPanel1.add(Fecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 180, 160, -1));
 
         jLabel2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N

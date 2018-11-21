@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -23,15 +24,15 @@ public class SubVentas extends javax.swing.JFrame {
 
     Conexion con = new Conexion();
         Connection Consulta = con.conexion();
-    /**
+    /**                             
      * Creates new form SubVentas
      */
     public SubVentas() {
         initComponents();
         this.setTitle("Menu Ventas - Sistema Inventario BTZ");
         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
-            Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocationRelativeTo(null);
 
     }
 
@@ -88,7 +89,7 @@ public class SubVentas extends javax.swing.JFrame {
                 jButton2ActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 300, 330, 120));
+        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 210, 330, 120));
 
         jLabel10.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
         jLabel10.setForeground(new java.awt.Color(255, 255, 255));
@@ -127,7 +128,7 @@ public class SubVentas extends javax.swing.JFrame {
         jButton5.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jButton5.setForeground(new java.awt.Color(255, 255, 255));
         jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconoso/icons8-historial-de-pedidos-100.png"))); // NOI18N
-        jButton5.setText("Registro de ventas");
+        jButton5.setText("<html>Facuturas Anuladas</html>");
         jButton5.setBorderPainted(false);
         jButton5.setContentAreaFilled(false);
         jButton5.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/iconoso/icons8-historial-de-pedidos-filled-100.png"))); // NOI18N
@@ -136,7 +137,7 @@ public class SubVentas extends javax.swing.JFrame {
                 jButton5ActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton5, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 190, 330, 120));
+        jPanel1.add(jButton5, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 310, 330, 120));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -162,7 +163,8 @@ public class SubVentas extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
             if(Resolucin())
             {
-                Ventas nr= new Ventas();
+                ArrayList<String> Nuevo=new ArrayList<String>();
+                Ventas nr= new Ventas(Nuevo);
                 nr.setVisible(true);
                 dispose();
             }
@@ -180,7 +182,7 @@ public class SubVentas extends javax.swing.JFrame {
         Boolean Val=false;
         try {
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("Select id from Resoluciones where Activo=True");
+            ResultSet Ca = sx.executeQuery("Select id from Resoluciones where Activo=True && Incremento!=RangoF");
             while(Ca.next())
             {
                 Val=true;
@@ -220,9 +222,10 @@ public class SubVentas extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        Mostrarventas n=new Mostrarventas();
+        FacturasExCanceladas n=new FacturasExCanceladas();
         n.setVisible(true);
-        dispose();// TODO add your handling code here:
+        dispose();
+        // TODO add your handling code here:
     }//GEN-LAST:event_jButton5ActionPerformed
 
     /**

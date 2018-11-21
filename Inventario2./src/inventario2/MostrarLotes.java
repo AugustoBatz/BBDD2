@@ -55,7 +55,8 @@ public class MostrarLotes extends javax.swing.JFrame {
         initComponents();
         this.setSize(1300, 1000);
         this.setResizable(false);
-   
+    this.setLocationRelativeTo(null);        
+
         this.setTitle("Stock "+Nombre +", "+Marca+" - Sistema Inventario BTZ");
         PanelEditar.setVisible(false);
         this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 

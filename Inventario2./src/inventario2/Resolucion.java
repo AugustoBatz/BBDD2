@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -32,6 +33,8 @@ public class Resolucion extends javax.swing.JFrame {
     public Resolucion() {
         initComponents();
         this.setTitle("Resoluciones - Sistema Inventario BTZ");
+         this.setLocationRelativeTo(null);        
+
         Serie.setText("");
         Final.setText("");
         Inicio.setText("");
@@ -105,8 +108,6 @@ public class Resolucion extends javax.swing.JFrame {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Ingreso de Resolución");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 480, -1));
-
-        Fecha.setDateFormatString("yyyy-MM-d");
         jPanel1.add(Fecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 180, 160, -1));
 
         jLabel2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
@@ -275,13 +276,18 @@ public class Resolucion extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_formWindowClosing
     private void llenarResolucion(int x,int y, int z)
-    {   
+    {   Calendar calendario = new GregorianCalendar();
+     int hora =calendario.get(Calendar.HOUR_OF_DAY);
+     int minutos = calendario.get(Calendar.MINUTE);
+     int segundos = calendario.get(Calendar.SECOND);
+        String FechaConHora=x+"-"+y+"-"+z+" "+hora+":"+minutos+
+                ":"+segundos;
          try {
              PreparedStatement CrearRes = tr.prepareStatement("INSERT INTO Resoluciones(Serie,RangoI,NoR,Fecha,INCREMENTO,RangoF,Activo) VALUES(?,?,?,?,?,?,0)");
              CrearRes.setString(1, Serie.getText());
              CrearRes.setString(2, Inicio.getText());
              CrearRes.setString(3, NR.getText());
-             CrearRes.setString(4, x+"-"+y+"-"+z);
+             CrearRes.setString(4, FechaConHora);
              CrearRes.setString(5, Inicio.getText());
              CrearRes.setString(6, Final.getText());
              CrearRes.executeUpdate();

@@ -2,12 +2,15 @@ package inventario2;
 //valor en globo bloquear
 //import com.mxrck.autocompleter.TextAutoCompleter;
 
+import com.mxrck.autocompleter.AutoCompleterCallback;
 import com.mxrck.autocompleter.TextAutoCompleter;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -46,6 +50,8 @@ public class Compras extends javax.swing.JFrame {
     private int mes = 0;
     private int dia = 0;
     private String Codigo;
+    private String idUsuario="";
+    private Boolean Seleccion=false;
     private String[] EFactura = new String[3];
     private String[] EProducto = new String[3];
     private String[] EDetalle = new String[3];
@@ -67,18 +73,34 @@ public class Compras extends javax.swing.JFrame {
         Nombre2.setText("");
         Marca.setText("");
         
-        textAutoCompleter = new TextAutoCompleter(Pr);
+        textAutoCompleter = new TextAutoCompleter(Pr, new AutoCompleterCallback() {
+            @Override
+            public void callback(Object selectedItem) {
+                if (textAutoCompleter.itemExists(selectedItem)) {
+                    llenar((String)selectedItem);
+                    valor = true;
+                    Seleccion = true;
+                    
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "No existe el producto");
+
+                }
+                
+                }   
+            
+        });
         textAutoCompleter.setCaseSensitive(false);
         textAutoCompleter.setMode(0);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         //this.setSize(dim);
-        this.setLocation(dim.width / 4 - this.getSize().width / 4, dim.height / 10 - this.getSize().height / 10);
-        
+        this.setLocationRelativeTo(null);
+
         this.setResizable(false);
-        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);        
+        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
         java.util.Date fecha = new Date();
         Fech.setDate(fecha);
-        
+
         this.setSize(1265, 720);
         //AutoCompleteDecorator.decorate(Otro);
         AutoCompleteDecorator.decorate(Otro1);
@@ -86,14 +108,14 @@ public class Compras extends javax.swing.JFrame {
         modelo.setRowCount(0);
         modelo.addColumn("Codigo"); //0
         this.setTitle("Compras - Sistema Inventario BTZ");
-        
+
         modelo.addColumn("Cantidad"); //1
         modelo.addColumn("Medida"); //2
         modelo.addColumn("Nombre");//3
         modelo.addColumn("Marca");//4
         modelo.addColumn("Costo Unitario");//5
         modelo.addColumn("Costo Total");//6
-        modelo.addColumn("Descripcion");//7
+        //modelo.addColumn("Descripcion");//7
         modelo.addColumn("Ganancia");//8
         modelo.addColumn("Precio Unitario");//9
         modelo.addColumn("Precio Total");//10
@@ -107,24 +129,31 @@ public class Compras extends javax.swing.JFrame {
         Ganancia.setText("");
         Serie.requestFocus();
         try {
-            
+
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Codigo,Nombre,Marca,Medida FROM Producto");
+            ResultSet Ca = sx.executeQuery("	SELECT P.Codigo,P.Nombre,P.Marca,U.Medida,Z.Presentacion,C.Categoria FROM Producto P \n"
+                    + "inner join UnidadMedida_1 U \n"
+                    + "on U.id=P.UnidadMedida_1_id\n"
+                    + "inner join Presentacion_1 Z\n"
+                    + "on Z.id=P.Presentacion_1_id\n"
+                    + "inner join Catalogo C \n"
+                    + "on C.id=P.Catalogo_id ");
             while (Ca.next()) {
-                
-                textAutoCompleter.addItem(Ca.getString(1) + "," + Ca.getString(2) + "," + Ca.getString(3) + "," + Ca.getString(4));
+
+                textAutoCompleter.addItem(Ca.getString(1) + "," + Ca.getString(2) + "," + Ca.getString(3) + "," + Ca.getString(4) + "," + Ca.getString(5)
+                        + "," + Ca.getString(6));
             }
         } catch (SQLException ex) {
             Logger.getLogger(Compras.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         try {
-            
+
             Statement sx2 = Consulta2.createStatement();
             ResultSet Ca2 = sx2.executeQuery("SELECT Nit FROM Proveedor");
             while (Ca2.next()) {
                 Otro1.addItem(Ca2.getString(1));
-                
+
             }
         } catch (SQLException ex) {
             Logger.getLogger(Compras.class.getName()).log(Level.SEVERE, null, ex);
@@ -136,42 +165,44 @@ public class Compras extends javax.swing.JFrame {
                 n2 = 0;
             }
         });
-        if(EDetalles.isEmpty())
-        {
-            
-        }
-        else
-        {
-            int tamaño=EDetalles.size();
-            int total=tamaño/11;
-       
-            int conteo=0;
+
+        Pr.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                Pr.setText("");
+            }
+        });
+        if (EDetalles.isEmpty()) {
+
+        } else {
+            int tamaño = EDetalles.size();
+            int total = tamaño / 10;
+
+            int conteo = 0;
             for (int i = 0; i < total; i++) {
-                    
-                     modelo.addRow(new Object[]{
-                     EDetalles.get(conteo),
-                     EDetalles.get(conteo+1),
-                     EDetalles.get(conteo+2),
-                     EDetalles.get(conteo+3),
-                     EDetalles.get(conteo+4),
-                     EDetalles.get(conteo+5),
-                     EDetalles.get(conteo+6),
-                     EDetalles.get(conteo+7),
-                     EDetalles.get(conteo+8),
-                     EDetalles.get(conteo+9),
-                     EDetalles.get(conteo+10)
-                 
-                 });
-                conteo=conteo+11;
-               
+
+                modelo.addRow(new Object[]{
+                    EDetalles.get(conteo),
+                    EDetalles.get(conteo + 1),
+                    EDetalles.get(conteo + 2),
+                    EDetalles.get(conteo + 3),
+                    EDetalles.get(conteo + 4),
+                    EDetalles.get(conteo + 5),
+                    EDetalles.get(conteo + 6),
+                    EDetalles.get(conteo + 7),
+                    EDetalles.get(conteo + 8),
+                    EDetalles.get(conteo + 9),
+                    //EDetalles.get(conteo + 10)
+
+                });
+                conteo = conteo + 10;
 
             }
             sumar_columnas();
-           
+
         }
-        
+
     }
-  
+
     private String mensaje(String x) {
         int numero = 0;
         try {
@@ -189,7 +220,7 @@ public class Compras extends javax.swing.JFrame {
         int id3 = 0;
         try {
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT id FROM Producto WHERE Nombre='" + Nom + "'&& Marca='" + Marca + "' && Medida='" + uni + "'");
+            ResultSet Ca = sx.executeQuery("SELECT P.id FROM Producto P inner join UnidadMedida_1 U on U.id=P.UnidadMedida_1_id WHERE P.Nombre='" + Nom + "'&& P.Marca='" + Marca + "' && U.Medida='" + uni + "'");
             while (Ca.next()) {
                 id3 = Integer.parseInt(Ca.getString(1));
             }
@@ -252,18 +283,17 @@ public class Compras extends javax.swing.JFrame {
         Fech = new com.toedter.calendar.JDateChooser();
         Nombre2 = new javax.swing.JTextField();
         Apellido = new javax.swing.JTextField();
+        Nota = new javax.swing.JRadioButton();
         jPanel2 = new javax.swing.JPanel();
         panel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         Cantidad = new javax.swing.JTextField();
+        Costo = new javax.swing.JTextField();
         addfila = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        Descripcion = new javax.swing.JTextField();
         jLabel23 = new javax.swing.JLabel();
         jLabel24 = new javax.swing.JLabel();
-        Costo = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         jButton5 = new javax.swing.JButton();
         jLabel12 = new javax.swing.JLabel();
@@ -273,6 +303,10 @@ public class Compras extends javax.swing.JFrame {
         Marca = new javax.swing.JTextField();
         jTextField1 = new javax.swing.JTextField();
         Pr = new javax.swing.JTextField();
+        jLabel25 = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        Uni = new javax.swing.JTextField();
+        Prese = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         jLabel16 = new javax.swing.JLabel();
@@ -352,12 +386,12 @@ public class Compras extends javax.swing.JFrame {
         jLabel10.setFont(new java.awt.Font("DejaVu Sans", 1, 18)); // NOI18N
         jLabel10.setForeground(new java.awt.Color(255, 255, 255));
         jLabel10.setText("Nombre");
-        jPaneldedatos.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, -1, -1));
+        jPaneldedatos.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 120, -1, -1));
 
         jLabel11.setFont(new java.awt.Font("DejaVu Sans", 1, 18)); // NOI18N
         jLabel11.setForeground(new java.awt.Color(255, 255, 255));
         jLabel11.setText("Representante");
-        jPaneldedatos.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
+        jPaneldedatos.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 180, -1, -1));
 
         jLabel13.setForeground(new java.awt.Color(255, 255, 255));
         jLabel13.setText("Nit Proveedor");
@@ -383,7 +417,7 @@ public class Compras extends javax.swing.JFrame {
                 jButton2ActionPerformed(evt);
             }
         });
-        jPaneldedatos.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 210, 230, 70));
+        jPaneldedatos.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 240, 230, 70));
 
         jLabel22.setFont(new java.awt.Font("DejaVu Sans", 1, 18)); // NOI18N
         jLabel22.setForeground(new java.awt.Color(255, 255, 255));
@@ -397,7 +431,7 @@ public class Compras extends javax.swing.JFrame {
         jPaneldedatos.add(Fech, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 70, 170, 30));
 
         Nombre2.setEditable(false);
-        jPaneldedatos.add(Nombre2, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 230, 110, -1));
+        jPaneldedatos.add(Nombre2, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 120, 210, -1));
 
         Apellido.setEditable(false);
         Apellido.addActionListener(new java.awt.event.ActionListener() {
@@ -405,7 +439,15 @@ public class Compras extends javax.swing.JFrame {
                 ApellidoActionPerformed(evt);
             }
         });
-        jPaneldedatos.add(Apellido, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 270, 110, -1));
+        jPaneldedatos.add(Apellido, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 180, 210, -1));
+
+        Nota.setText("Nota De Crédito");
+        Nota.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NotaActionPerformed(evt);
+            }
+        });
+        jPaneldedatos.add(Nota, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 260, -1, -1));
 
         jPanel1.add(jPaneldedatos, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 580, 320));
 
@@ -426,10 +468,13 @@ public class Compras extends javax.swing.JFrame {
 
         panel3.setBackground(new java.awt.Color(62, 142, 194));
         panel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        panel3.setAutoscrolls(true);
+        panel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Producto");
+        panel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 20, 84, -1));
 
         Cantidad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -441,6 +486,24 @@ public class Compras extends javax.swing.JFrame {
                 CantidadKeyTyped(evt);
             }
         });
+        panel3.add(Cantidad, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 226, 100, -1));
+
+        Costo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                CostoFocusLost(evt);
+            }
+        });
+        Costo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CostoActionPerformed(evt);
+            }
+        });
+        Costo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                CostoKeyTyped(evt);
+            }
+        });
+        panel3.add(Costo, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 264, 100, 29));
 
         addfila.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         addfila.setForeground(new java.awt.Color(255, 255, 255));
@@ -453,47 +516,32 @@ public class Compras extends javax.swing.JFrame {
                 addfilaActionPerformed(evt);
             }
         });
+        panel3.add(addfila, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 250, 160, 50));
 
         jLabel2.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Cantidad");
+        panel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 233, -1, -1));
 
         jLabel6.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setText("CostoUnitario");
-
-        jLabel5.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel5.setText("Descripcion");
-
-        Descripcion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                DescripcionActionPerformed(evt);
-            }
-        });
+        panel3.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 270, -1, -1));
 
         jLabel23.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         jLabel23.setForeground(new java.awt.Color(255, 255, 255));
         jLabel23.setText("Producto:");
+        panel3.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 67, -1, -1));
 
         jLabel24.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         jLabel24.setForeground(new java.awt.Color(255, 255, 255));
         jLabel24.setText("Marca:");
-
-        Costo.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                CostoFocusLost(evt);
-            }
-        });
-        Costo.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                CostoKeyTyped(evt);
-            }
-        });
+        panel3.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 105, -1, -1));
 
         jLabel4.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("Unidad");
+        panel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(13, 144, -1, -1));
 
         jButton5.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jButton5.setForeground(new java.awt.Color(255, 255, 255));
@@ -507,10 +555,12 @@ public class Compras extends javax.swing.JFrame {
                 jButton5ActionPerformed(evt);
             }
         });
+        panel3.add(jButton5, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 250, -1, 50));
 
         jLabel12.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         jLabel12.setForeground(new java.awt.Color(255, 255, 255));
         jLabel12.setText("Ganancia");
+        panel3.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 191, -1, -1));
 
         Unidad.setEditable(false);
         Unidad.addActionListener(new java.awt.event.ActionListener() {
@@ -518,10 +568,13 @@ public class Compras extends javax.swing.JFrame {
                 UnidadActionPerformed(evt);
             }
         });
+        panel3.add(Unidad, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 143, 80, -1));
 
         Ganancia.setEditable(false);
+        panel3.add(Ganancia, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 188, 80, -1));
 
         Nombre.setEditable(false);
+        panel3.add(Nombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 60, 356, -1));
 
         Marca.setEditable(false);
         Marca.addActionListener(new java.awt.event.ActionListener() {
@@ -529,10 +582,17 @@ public class Compras extends javax.swing.JFrame {
                 MarcaActionPerformed(evt);
             }
         });
+        panel3.add(Marca, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 98, 356, -1));
 
         jTextField1.setEditable(false);
         jTextField1.setText("%");
+        panel3.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(225, 188, 42, -1));
 
+        Pr.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                PrFocusLost(evt);
+            }
+        });
         Pr.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 PrKeyTyped(evt);
@@ -541,118 +601,30 @@ public class Compras extends javax.swing.JFrame {
                 PrKeyPressed(evt);
             }
         });
+        panel3.add(Pr, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 13, 440, -1));
 
-        javax.swing.GroupLayout panel3Layout = new javax.swing.GroupLayout(panel3);
-        panel3.setLayout(panel3Layout);
-        panel3Layout.setHorizontalGroup(
-            panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panel3Layout.createSequentialGroup()
-                .addGap(11, 11, 11)
-                .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(panel3Layout.createSequentialGroup()
-                        .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel23)
-                            .addComponent(jLabel24))
-                        .addGap(49, 49, 49)
-                        .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panel3Layout.createSequentialGroup()
-                                .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(Nombre, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(Marca, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(121, 121, 121)
-                                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(Pr, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(panel3Layout.createSequentialGroup()
-                            .addComponent(Descripcion, javax.swing.GroupLayout.PREFERRED_SIZE, 346, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(92, 92, 92)
-                            .addComponent(addfila, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(panel3Layout.createSequentialGroup()
-                            .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(panel3Layout.createSequentialGroup()
-                                    .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel2)
-                                        .addComponent(jLabel6))
-                                    .addGap(21, 21, 21)
-                                    .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(Cantidad, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                                        .addComponent(Costo)))
-                                .addComponent(jLabel5))
-                            .addGap(46, 46, 46)
-                            .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel4)
-                                .addComponent(jLabel12))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(panel3Layout.createSequentialGroup()
-                                    .addComponent(Ganancia, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(Unidad, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(19, Short.MAX_VALUE))
-        );
-        panel3Layout.setVerticalGroup(
-            panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panel3Layout.createSequentialGroup()
-                .addGap(12, 12, 12)
-                .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(Pr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(7, 7, 7)
-                .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panel3Layout.createSequentialGroup()
-                        .addGap(8, 8, 8)
-                        .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(Nombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel23))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(Marca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel24)))
-                    .addGroup(panel3Layout.createSequentialGroup()
-                        .addGap(16, 16, 16)
-                        .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panel3Layout.createSequentialGroup()
-                        .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(Cantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))
-                        .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panel3Layout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addComponent(Costo, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panel3Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel6)))
-                        .addGap(8, 8, 8)
-                        .addComponent(jLabel5))
-                    .addGroup(panel3Layout.createSequentialGroup()
-                        .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(Unidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(panel3Layout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addComponent(jLabel4)))
-                        .addGap(13, 13, 13)
-                        .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel12)
-                            .addComponent(Ganancia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(16, 16, 16)
-                .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panel3Layout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(Descripcion, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(addfila, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
-        );
+        jLabel25.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
+        jLabel25.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel25.setText("Categoria");
+        panel3.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(279, 195, -1, -1));
+
+        jLabel26.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
+        jLabel26.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel26.setText("Presentación:");
+        panel3.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(279, 150, -1, -1));
+
+        Uni.setEditable(false);
+        panel3.add(Uni, new org.netbeans.lib.awtextra.AbsoluteConstraints(401, 188, 174, -1));
+
+        Prese.setEditable(false);
+        panel3.add(Prese, new org.netbeans.lib.awtextra.AbsoluteConstraints(401, 143, 174, -1));
 
         jPanel1.add(panel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 10, 630, 320));
 
         jLabel9.setFont(new java.awt.Font("DejaVu Sans", 3, 14)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(255, 255, 255));
         jLabel9.setText("Cantidad Total");
-        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 680, -1, -1));
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 680, -1, -1));
 
         jLabel15.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jLabel15.setForeground(new java.awt.Color(255, 255, 255));
@@ -689,7 +661,7 @@ public class Compras extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("DejaVu Sans", 3, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Total");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(1050, 680, -1, -1));
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(1110, 680, -1, -1));
 
         Factura.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -717,11 +689,11 @@ public class Compras extends javax.swing.JFrame {
                 TotalCantidadActionPerformed(evt);
             }
         });
-        jPanel1.add(TotalCantidad, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 640, 60, -1));
+        jPanel1.add(TotalCantidad, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 640, 60, -1));
 
         Totales.setEditable(false);
         Totales.setText("0.0");
-        jPanel1.add(Totales, new org.netbeans.lib.awtextra.AbsoluteConstraints(992, 640, 100, -1));
+        jPanel1.add(Totales, new org.netbeans.lib.awtextra.AbsoluteConstraints(1050, 640, 100, -1));
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -743,7 +715,7 @@ public class Compras extends javax.swing.JFrame {
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 1263, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 1296, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -780,10 +752,29 @@ public class Compras extends javax.swing.JFrame {
     }
     
     private void CrearLote(int idProd, int lotegrande, String idProv, String inf[], int id) {
+        Calendar calendario = new GregorianCalendar();
+     int hora =calendario.get(Calendar.HOUR_OF_DAY);
+     int minutos = calendario.get(Calendar.MINUTE);
+     int segundos = calendario.get(Calendar.SECOND);
+        String FechaConHora=año+"-"+mes+"-"+dia+" "+hora+":"+minutos+
+                ":"+segundos;
         try {
             int idUsuario = 0;
             
-            PreparedStatement CrearLot = tr.prepareStatement("INSERT INTO Lote(Producto_id,CostoUnitario,Cantidad,Cantidadi,CostoTotal,Descripcion,NoLote,Ganancia,PrecioUnitario,PrecioTotal,Fecha,FacturaCompra_id,Disponible) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1)",
+            PreparedStatement CrearLot = tr.prepareStatement("INSERT INTO Lote("
+                    + "Producto_id,"
+                    + "CostoUnitario,"
+                    + "Cantidad,"
+                    + "Cantidadi,"
+                    + "CostoTotal,"
+                    + "NoLote,"
+                    + "Ganancia,"
+                    + "PrecioUnitario,"
+                    + "PrecioTotal,"
+                    + "Fecha,"
+                    + "FacturaCompra_id,"
+                    + "Disponible,"
+                    + "Anulado) VALUES(?,?,?,?,?,?,?,?,?,?,?,1,0)",
                     Statement.RETURN_GENERATED_KEYS);
             
             CrearLot.setString(1, String.valueOf(idProd));
@@ -791,13 +782,13 @@ public class Compras extends javax.swing.JFrame {
             CrearLot.setString(3, inf[1]);
             CrearLot.setString(4, inf[1]);
             CrearLot.setString(5, inf[6]);
-            CrearLot.setString(6, inf[7]);
-            CrearLot.setString(7, String.valueOf(lotegrande));
+            //CrearLot.setString(6, inf[7]);
+            CrearLot.setString(6, String.valueOf(lotegrande));
+            CrearLot.setString(7, inf[7]);
             CrearLot.setString(8, inf[8]);
             CrearLot.setString(9, inf[9]);
-            CrearLot.setString(10, inf[10]);
-            CrearLot.setString(11, año + "-" + mes + "-" + dia);
-            CrearLot.setString(12, String.valueOf(id));
+            CrearLot.setString(10, FechaConHora);
+            CrearLot.setString(11, String.valueOf(id));
             CrearLot.executeUpdate();
             
             try (ResultSet rs = CrearLot.getGeneratedKeys()) {
@@ -882,63 +873,116 @@ public class Compras extends javax.swing.JFrame {
         }
         return fecha1.compareTo(fecha2);
     }
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
+    private Boolean validarFactura()
+    {
+        Boolean Valor=true;
         try {
             
-            año = Fech.getCalendar().get(Calendar.YEAR);
-            mes = Fech.getCalendar().get(Calendar.MONTH) + 1;
-            dia = Fech.getCalendar().get(Calendar.DAY_OF_MONTH);
-            
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT F.id FROM FacturaCompra F Inner join Proveedor P on P.id=F.Proveedor_id"
+                    + " WHERE P.Nit='" +nitglobal+ "' && F.Serie='"+Serie.getText()+"' && F.Numero='"+Numero.getText()+"'");
+            while(Ca.next())
+            {
+                Valor=false;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Compras.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return Valor;
+    }
+    private Boolean construir(){
+        LoginView n=new LoginView(null,true);
+        new LoginController(n);
+        n.addWindowListener(new WindowAdapter(){
+             @Override
+             public void windowClosing(WindowEvent we )
+             {
+                 System.exit(0);
+             }
+        });
+        n.pack();
+        n.setLocationRelativeTo(null);
+        
+        n.setVisible(true);
+        idUsuario=n.getRol();
+        if(idUsuario.equals(""))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        if(construir())
+        {
+            try {
+
+                año = Fech.getCalendar().get(Calendar.YEAR);
+                mes = Fech.getCalendar().get(Calendar.MONTH) + 1;
+                dia = Fech.getCalendar().get(Calendar.DAY_OF_MONTH);
+
+            } catch (NullPointerException ex) {
+            }
+            if (año == 0 && dia == 0 && mes == 00) {
+                JOptionPane.showMessageDialog(this, "Al menos selecciona una fecha válida!", "Error!", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                String F = año + "-" + mes + "-" + dia;
+                if (Fecha2(F) >= 0) {
+                    if (Serie.getText().equals("") || Numero.getText().equals("")) {
+                        JOptionPane.showMessageDialog(null, "Información de Factura Faltante");
+                    } else {
+                        if (Factura.getRowCount() == 0) {
+                            JOptionPane.showMessageDialog(null, "Factura Vacía");
+
+                        } else {
+
+                            if (validarFactura()) {
+                                int idF = generarFactura();
+                                String x[] = new String[11];
+                                for (int i = 0; i < Factura.getRowCount(); i++) {
+                                    for (int j = 0; j < Factura.getColumnCount(); j++) {
+                                        x[j] = Factura.getValueAt(i, j).toString().trim();
+
+                                    }
+                                    int iddd = getidPro(x[3], x[4], x[2]);
+
+                                    int loteee = lotereciente(iddd);
+                                    CrearLote(iddd, loteee, obtenerid(nitglobal), x, idF);
+                                }
+                                JOptionPane.showMessageDialog(null, "Productos Comprado Con Exito");
+                                submenucompras men = new submenucompras();
+                                men.setVisible(true);
+                                dispose();
+
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Esta Factura ya esta registrada con el mismo Número y Nit");
+                            }
+                        }
+
+                    }
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Fecha incoherente: " + F);
+                }
+            }
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     
-    catch (NullPointerException ex) {
-        }
-        if (año == 0 && dia == 0 && mes == 00) {
-            JOptionPane.showMessageDialog(this, "Al menos selecciona una fecha válida!", "Error!", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            String F = año + "-" + mes + "-" + dia;
-            if (Fecha2(F) >= 0) {
-                if (Serie.getText().equals("") || Numero.getText().equals("")) {
-                    JOptionPane.showMessageDialog(null, "Información de Factura Faltante");                    
-                } else {
-                    if (Factura.getRowCount() == 0) {
-                        JOptionPane.showMessageDialog(null, "Factura Vacía");                        
-                        
-                    } else {                        
-                        int idF = generarFactura();
-                        String x[] = new String[11];
-                        for (int i = 0; i < Factura.getRowCount(); i++) {
-                            for (int j = 0; j < Factura.getColumnCount(); j++) {
-                                x[j] = Factura.getValueAt(i, j).toString().trim();
-                                
-                            }
-                            int iddd = getidPro(x[3], x[4], x[2]);
-                            
-                            int loteee = lotereciente(iddd);
-                            CrearLote(iddd, loteee, obtenerid(nitglobal), x, idF);
-                            
-                        }
-                    }
-                    
-                    JOptionPane.showMessageDialog(null, "Productos Comprado Con Exito");
-                    
-                    Menu men = new Menu();
-                    men.setVisible(true);
-                    dispose();
-                }
-                
-            } else {
-                JOptionPane.showMessageDialog(null, "Fecha incoherente: " + F);                
-            }
-        }
-    }
-
+   
     private int generarFactura() {
+  
         int id = 0;
+        Calendar calendario = new GregorianCalendar();
+     int hora =calendario.get(Calendar.HOUR_OF_DAY);
+     int minutos = calendario.get(Calendar.MINUTE);
+     int segundos = calendario.get(Calendar.SECOND);
+        String FechaConHora=año+"-"+mes+"-"+dia+" "+hora+":"+minutos+
+                ":"+segundos;
         try {
-            PreparedStatement CrearLot = tr.prepareStatement("INSERT INTO FacturaCompra(Serie,Numero,Total_Factura,Proveedor_id,Cantidad_Prod,Fecha,Anulado) VALUES(?,?,?,?,?,?,0)",
+            PreparedStatement CrearLot = tr.prepareStatement("INSERT INTO FacturaCompra(Serie,Numero,Total_Factura,Proveedor_id,Cantidad_Prod,Fecha,Usuarios_id,Anulado,Trans) VALUES(?,?,?,?,?,?,?,0,now())",
                     Statement.RETURN_GENERATED_KEYS);
             
             CrearLot.setString(1, Serie.getText());
@@ -947,7 +991,8 @@ public class Compras extends javax.swing.JFrame {
             CrearLot.setString(4, String.valueOf(getidProve(nitglobal)));
             CrearLot.setString(5, TotalCantidad.getText());
             
-            CrearLot.setString(6, año + "-" + mes + "-" + dia);
+            CrearLot.setString(6, FechaConHora);
+            CrearLot.setString(7, idUsuario);
             CrearLot.executeUpdate();
             try (ResultSet rs = CrearLot.getGeneratedKeys()) {
                 if (!rs.next()) {
@@ -958,6 +1003,7 @@ public class Compras extends javax.swing.JFrame {
                 CrearLot.close();
                 
             }
+            
             
         } catch (SQLException ex) {
             Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
@@ -994,41 +1040,6 @@ public class Compras extends javax.swing.JFrame {
         String id3 = null;
         id3 = obtenerid(nitglobal);
     }//GEN-LAST:event_Otro1ActionPerformed
-
-    private void CostoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_CostoKeyTyped
-        
-        int k = (int) evt.getKeyChar();
-        if (k == 10) {
-            Costo.transferFocus();
-            tp = 1;
-            Costo.setText("" + x(Double.parseDouble(Costo.getText())));
-            
-        } else {
-            if (k == 46) {
-                tp++;
-            }
-            
-            if (tp > 1) {
-                evt.setKeyChar((char) KeyEvent.VK_CLEAR);
-                JOptionPane.showMessageDialog(null, "Punto de mas", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
-                tp--;
-            }
-            
-            if (k >= 97 && k <= 127 || k >= 58 && k <= 97) {
-                evt.setKeyChar((char) KeyEvent.VK_CLEAR);
-                JOptionPane.showMessageDialog(null, "No puede ingresar letras!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
-            }
-            if (k == 241 || k == 209) {
-                evt.setKeyChar((char) KeyEvent.VK_CLEAR);
-                JOptionPane.showMessageDialog(null, "No puede ingresar letras!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
-            }
-            if (k >= 33 && k <= 45 || k == 47) {
-                evt.setKeyChar((char) KeyEvent.VK_CLEAR);
-                JOptionPane.showMessageDialog(null, "No puede ingresar Simbolos!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
-            }
-            
-        }        // TODO add your handling code here:
-    }//GEN-LAST:event_CostoKeyTyped
     private Boolean CompararEntrada(String Nombre, String Marca, String unidad) {
         
         String x[] = new String[3];
@@ -1053,37 +1064,55 @@ public class Compras extends javax.swing.JFrame {
         
     }
     private void addfilaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addfilaActionPerformed
-        if (Cantidad.getText().equals("")) {
-            JOptionPane.showMessageDialog(null, "Ingrese la Cantidad que desea comprar de: " + Nombre.getText());
-            
-        } else {
-            
-            if (CompararEntrada(Nombre.getText(), Marca.getText(), (String) Unidad.getText()) == false) {
-                JOptionPane.showMessageDialog(null, "Ya tiene este Producto Registrdo en la Factura");
+        if(Seleccion==true)
+        {
+            if (Cantidad.getText().equals("")||Costo.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Ingrese la Cantidad que desea comprar de: " + Nombre.getText());
+
             } else {
-                String Completo = Codigo;
-                try {
-                    
-                    modelo.addRow(new Object[]{Codigo, Cantidad.getText(), (String) Unidad.getText(), Nombre.getText(), Marca.getText(), Costo.getText(), CostoTotal(Double.parseDouble(Cantidad.getText()), Double.parseDouble(Costo.getText())), Descripcion.getText(),
-                        Ganancia.getText(), PrecioUnitario(Double.parseDouble(Costo.getText()), Double.parseDouble(Ganancia.getText()), Double.parseDouble(Costo.getText())),
-                         PrecioTotal(PrecioUnitario(Double.parseDouble(Costo.getText()), Double.parseDouble(Ganancia.getText()), Double.parseDouble(Costo.getText())), Double.parseDouble(Cantidad.getText()))});
-                } catch (NumberFormatException ex) {
+
+                if (CompararEntrada(Nombre.getText(), Marca.getText(), (String) Unidad.getText()) == false) {
+                    JOptionPane.showMessageDialog(null, "Ya tiene este Producto Registrdo en la Factura");
+                } else {
+                    String Completo = Codigo;
+                    try {
+
+                        modelo.addRow(new Object[]{Codigo, Cantidad.getText(), (String) Unidad.getText(), Nombre.getText(), Marca.getText(), Costo.getText(), CostoTotal(Double.parseDouble(Cantidad.getText()), Double.parseDouble(Costo.getText())),
+                            Ganancia.getText(), PrecioUnitario(Double.parseDouble(Costo.getText()), Double.parseDouble(Ganancia.getText()), Double.parseDouble(Costo.getText())),
+                            PrecioTotal(PrecioUnitario(Double.parseDouble(Costo.getText()), Double.parseDouble(Ganancia.getText()), Double.parseDouble(Costo.getText())), Double.parseDouble(Cantidad.getText()))});
+                        int TC = 0;
+                        TC = Integer.valueOf(TotalCantidad.getText());
+                        BigDecimal auxT = BigDecimal.valueOf(Double.parseDouble(Totales.getText()));
+                        auxT = auxT.add(PrecioTotal(PrecioUnitario(Double.parseDouble(Costo.getText()), Double.parseDouble(Ganancia.getText()), Double.parseDouble(Costo.getText())), Double.parseDouble(Cantidad.getText())));
+                        Totales.setText(String.valueOf((auxT)));
+                        TC = TC + Integer.valueOf(Cantidad.getText());
+                        TotalCantidad.setText(String.valueOf(TC));
+                        Cantidad.setText("");
+                        Costo.setText("");
+                        Nombre.setText("");
+                        Marca.setText("");
+                        Unidad.setText("");
+                        Ganancia.setText("");
+                        Uni.setText("");
+                        Seleccion=false;
+                        Prese.setText("");
+                        Pr.setText("");
+                        sumar_columnas();
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null, "Ocurrio un error");
+
+                    }
+
                 }
-                int TC = 0;
-                TC = Integer.valueOf(TotalCantidad.getText());
-                BigDecimal auxT = BigDecimal.valueOf(Double.parseDouble(Totales.getText()));
-                auxT = auxT.add(PrecioTotal(PrecioUnitario(Double.parseDouble(Costo.getText()), Double.parseDouble(Ganancia.getText()), Double.parseDouble(Costo.getText())), Double.parseDouble(Cantidad.getText())));
-                Totales.setText(String.valueOf((auxT)));
-                TC = TC + Integer.valueOf(Cantidad.getText());
-                TotalCantidad.setText(String.valueOf(TC));
+
             }
             
         }
-        Cantidad.setText("");
-        Costo.setText("");
-        Descripcion.setText("");
-        Ganancia.setText("");
-        sumar_columnas();
+        else
+        {
+            JOptionPane.showMessageDialog(null, "Seleccion un Producto Antes");                
+ 
+        }
         // TODO add your handling code here:
     }//GEN-LAST:event_addfilaActionPerformed
     private BigDecimal CostoTotal(Double Cantidad, Double Costo) {
@@ -1115,7 +1144,7 @@ public class Compras extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "No puede ingresar Simbolos!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
         }
         if (k == 10) {
-            Cantidad.transferFocus();
+            Costo.requestFocus();
         }
         // TODO add your handling code here:
     }//GEN-LAST:event_CantidadKeyTyped
@@ -1136,18 +1165,6 @@ public class Compras extends javax.swing.JFrame {
         }
         
     }
-    private void DescripcionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DescripcionActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_DescripcionActionPerformed
-
-    private void CostoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_CostoFocusLost
-        try {
-            Costo.setText("" + x(Double.parseDouble(Costo.getText())));
-        } catch (NumberFormatException ex) {
-        }
-        // TODO add your handling code here:
-    }//GEN-LAST:event_CostoFocusLost
-
     private void NumeroKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_NumeroKeyTyped
         int k = (int) evt.getKeyChar();
         if (k >= 97 && k <= 127 || k >= 58 && k <= 97) {
@@ -1163,13 +1180,13 @@ public class Compras extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "No puede ingresar Simbolos!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
         }
         if (k == 10) {
-            Numero.transferFocus();
+           // Numero.transferFocus();
         }
 // TODO add your handling code here:
     }//GEN-LAST:event_NumeroKeyTyped
 
     private void NumeroFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_NumeroFocusLost
-        Fech.requestFocus();        // TODO add your handling code here:
+//        Fech.requestFocus();        // TODO add your handling code here:
     }//GEN-LAST:event_NumeroFocusLost
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
@@ -1186,29 +1203,69 @@ public class Compras extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        
-        int filas = modelo.getRowCount();
-        
-        if (filas != 0) {
-            for (int i = 0; i < Factura.getRowCount(); i++) {
-                for (int j = 0; j < Factura.getColumnCount(); j++) {
-                    Detalles.add(Factura.getValueAt(i, j).toString());
-                }
+    private Boolean ifexist()
+    {
+        Boolean au=false;
+        try {
+            
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT id FROM Presentacion_1");
+            while(Ca.next())
+            {
+                au=true;
             }
             
+        } catch (SQLException ex) {
+            Logger.getLogger(Compras.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        String[] EFactura = new String[3];
-        EFactura[0] = Serie.getText();
-        EFactura[1] = Numero.getText();
-        Date aux = new Date();
-        aux = Fech.getDate();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        EFactura[2] = sdf.format(aux);
-        CrearProducto ss = new CrearProducto(EFactura, EProducto, EDetalle,Detalles);
-        ss.setVisible(true);
-        dispose();
+        return au;
+    }
+     private Boolean ifexist2()
+    {
+        Boolean au=false;
+        try {
+            
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT id FROM UnidadMedida_1");
+            while(Ca.next())
+            {
+                au=true;
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(Compras.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return au;
+    }
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        if(ifexist2()&&ifexist())
+        {
+            int filas = modelo.getRowCount();
+
+            if (filas != 0) {
+                for (int i = 0; i < Factura.getRowCount(); i++) {
+                    for (int j = 0; j < Factura.getColumnCount(); j++) {
+                        Detalles.add(Factura.getValueAt(i, j).toString());
+                    }
+                }
+
+            }
+
+            String[] EFactura = new String[3];
+            EFactura[0] = Serie.getText();
+            EFactura[1] = Numero.getText();
+            Date aux = new Date();
+            aux = Fech.getDate();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            EFactura[2] = sdf.format(aux);
+            CrearProducto ss = new CrearProducto(EFactura, EProducto, EDetalle,Detalles);
+            ss.setVisible(true);
+            dispose();
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(null, "Categoria y/o Medidas Vacias, Ingrese Nuevas ");
+        }
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void ApellidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ApellidoActionPerformed
@@ -1238,13 +1295,18 @@ public class Compras extends javax.swing.JFrame {
         try {
             
             Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT Nombre,Marca,Medida,Ganancia FROM Producto Where Codigo='" + Codigo + "'");
+            ResultSet Ca = sx.executeQuery("select P.Nombre,P.Marca,U.Medida,P.Ganancia,Z.Presentacion,C.Categoria FROM Producto P inner join UnidadMedida_1 U on U.id=P.UnidadMedida_1_id inner join Presentacion_1 Z\n" +
+"on Z.id=P.Presentacion_1_id\n" +
+"inner join Catalogo C \n" +
+"on C.id=P.Catalogo_id  Where P.Codigo='"+Codigo+"'");
             while (Ca.next()) {
                 
                 Unidad.setText(Ca.getString(3));
                 Nombre.setText(Ca.getString(1));
                 Marca.setText(Ca.getString(2));
                 Ganancia.setText(Ca.getString(4));
+                Prese.setText(Ca.getString(5));
+                Uni.setText(Ca.getString(6));
                 
             }
         } catch (SQLException ex) {
@@ -1258,25 +1320,95 @@ public class Compras extends javax.swing.JFrame {
             if (textAutoCompleter.itemExists(textAutoCompleter.getItemSelected())) {
                 llenar((String) textAutoCompleter.getItemSelected());
                 valor = true;
+                Seleccion=true;
+                            Cantidad.requestFocus();
+
             } else {
                 JOptionPane.showMessageDialog(null, "No existe el producto");
                 
             }
             
-        }           // TODO add your handling code here:
+        }
+       
+        
+        // TODO add your handling code here:
     }//GEN-LAST:event_PrKeyTyped
 
     private void PrKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_PrKeyPressed
 
         // TODO add your handling code here:
     }//GEN-LAST:event_PrKeyPressed
+
+    private void CostoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_CostoKeyTyped
+
+        int k = (int) evt.getKeyChar();
+        if (k == 10) {
+           // Costo.transferFocus();
+            tp = 1;
+            Costo.setText("" + x(Double.parseDouble(Costo.getText())));
+
+        } else {
+            if (k == 46) {
+                tp++;
+            }
+
+            if (tp > 1) {
+                evt.setKeyChar((char) KeyEvent.VK_CLEAR);
+                JOptionPane.showMessageDialog(null, "Punto de mas", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
+                tp--;
+            }
+
+            if (k >= 97 && k <= 127 || k >= 58 && k <= 97) {
+                evt.setKeyChar((char) KeyEvent.VK_CLEAR);
+                JOptionPane.showMessageDialog(null, "No puede ingresar letras!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
+            }
+            if (k == 241 || k == 209) {
+                evt.setKeyChar((char) KeyEvent.VK_CLEAR);
+                JOptionPane.showMessageDialog(null, "No puede ingresar letras!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
+            }
+            if (k >= 33 && k <= 45 || k == 47) {
+                evt.setKeyChar((char) KeyEvent.VK_CLEAR);
+                JOptionPane.showMessageDialog(null, "No puede ingresar Simbolos!!!", "Ventana Error Datos", JOptionPane.ERROR_MESSAGE);
+            }
+
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_CostoKeyTyped
+
+    private void CostoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_CostoFocusLost
+        try {
+            Costo.setText("" + x(Double.parseDouble(Costo.getText())));
+        } catch (NumberFormatException ex) {
+        }
+        // TODO add your handling code here:
+    }//GEN-LAST:event_CostoFocusLost
+
+    private void Construir()
+            
+    {
+       // NotaCredito n=new NotaCredito(null,true);
+        
+    }
+    private void NotaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NotaActionPerformed
+        if(Nota.isSelected())
+        {
+            
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_NotaActionPerformed
+
+    private void CostoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CostoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_CostoActionPerformed
+
+    private void PrFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_PrFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_PrFocusLost
     private void sumar_columnas() {
         if (Factura.getRowCount() != 0) {
             BigDecimal n = BigDecimal.valueOf(0);
             int c = 0;
             for (int i = 0; i < Factura.getRowCount(); i++) {
                 c = c + Integer.valueOf(Factura.getValueAt(i, 1).toString().trim());
-                n = n.add(BigDecimal.valueOf(Double.valueOf(Factura.getValueAt(i, 10).toString().trim())));
+                n = n.add(BigDecimal.valueOf(Double.valueOf(Factura.getValueAt(i, 9).toString().trim())));
                 
             }
             TotalCantidad.setText(String.valueOf(c));
@@ -1326,7 +1458,6 @@ public class Compras extends javax.swing.JFrame {
     private javax.swing.JTextField Apellido;
     private javax.swing.JTextField Cantidad;
     private javax.swing.JTextField Costo;
-    private javax.swing.JTextField Descripcion;
     private rojerusan.RSTableMetro Factura;
     private com.toedter.calendar.JDateChooser Fech;
     private javax.swing.JLabel Fecha;
@@ -1334,12 +1465,15 @@ public class Compras extends javax.swing.JFrame {
     private javax.swing.JTextField Marca;
     private javax.swing.JTextField Nombre;
     private javax.swing.JTextField Nombre2;
+    private javax.swing.JRadioButton Nota;
     private javax.swing.JTextField Numero;
     private javax.swing.JComboBox<String> Otro1;
     private javax.swing.JTextField Pr;
+    private javax.swing.JTextField Prese;
     private javax.swing.JTextField Serie;
     private javax.swing.JTextField TotalCantidad;
     private javax.swing.JTextField Totales;
+    private javax.swing.JTextField Uni;
     private javax.swing.JTextField Unidad;
     private javax.swing.JButton addfila;
     private javax.swing.JButton jButton1;
@@ -1358,9 +1492,10 @@ public class Compras extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;

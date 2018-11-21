@@ -12,6 +12,8 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,48 +33,39 @@ public class agregaremple extends javax.swing.JFrame {
     Connection us = con.conexion();
     boolean disponible =true;
         Connection Consulta = con.conexion();
+      private  String idUsuario="";
         
     /**
      * Creates new form agregaremple
      */
     public agregaremple() {
         initComponents();
-        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE); 
-        
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-      //  boxpuesto.addItem("Vendedor");
-       // boxpuesto.addItem("Dueño");
-        pw.addMouseListener(new MouseAdapter(){
-            public void mouseClicked(MouseEvent e){
-             pw.setText(null);
-             
+        this.setDefaultCloseOperation(this.HIDE_ON_CLOSE);
+
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocationRelativeTo(null);
+        //  boxpuesto.addItem("Vendedor");
+        // boxpuesto.addItem("Dueño");
+
+        contraseña.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                contraseña.setText(null);
+
             }
         });
-        Admin.addMouseListener(new MouseAdapter(){
-            public void mouseClicked(MouseEvent e){
-             Admin.setText(null);
-             
-            }
-        });
-        contraseña.addMouseListener(new MouseAdapter(){
-            public void mouseClicked(MouseEvent e){
-             contraseña.setText(null);
-             
-            }
-        });
-        
-        cocontraseña.addMouseListener(new MouseAdapter(){
-            public void mouseClicked(MouseEvent e){
-             cocontraseña.setText(null);
-             
+
+        cocontraseña.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                cocontraseña.setText(null);
+
             }
         });
         Diponible.setVisible(false);
         correcto.setVisible(false);
-                        this.setTitle("Ingreso Empleados - Sistema Inventario BTZ");
+         dpiregis.setVisible(false);
+        this.setTitle("Ingreso Empleados - Sistema Inventario BTZ");
 
-    }   
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -101,11 +94,8 @@ public class agregaremple extends javax.swing.JFrame {
         contraseña = new javax.swing.JPasswordField();
         cocontraseña = new javax.swing.JPasswordField();
         correcto = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        Admin = new javax.swing.JTextField();
-        jLabel13 = new javax.swing.JLabel();
-        pw = new javax.swing.JPasswordField();
         guardar = new javax.swing.JButton();
+        dpiregis = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -120,13 +110,41 @@ public class agregaremple extends javax.swing.JFrame {
 
         paneldatos.setBackground(new java.awt.Color(17, 111, 172));
         paneldatos.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        nombre.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                nombreKeyTyped(evt);
+            }
+        });
         paneldatos.add(nombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(87, 20, 338, -1));
+
+        apellido.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                apellidoKeyTyped(evt);
+            }
+        });
         paneldatos.add(apellido, new org.netbeans.lib.awtextra.AbsoluteConstraints(87, 64, 338, -1));
+
+        dpi.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                dpiFocusLost(evt);
+            }
+        });
+        dpi.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                dpiKeyTyped(evt);
+            }
+        });
         paneldatos.add(dpi, new org.netbeans.lib.awtextra.AbsoluteConstraints(87, 110, 175, -1));
 
         usuario.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 usuarioFocusLost(evt);
+            }
+        });
+        usuario.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                usuarioKeyTyped(evt);
             }
         });
         paneldatos.add(usuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(85, 159, 135, -1));
@@ -169,40 +187,27 @@ public class agregaremple extends javax.swing.JFrame {
         jLabel14.setText("Contraseña");
         paneldatos.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 220, -1, -1));
 
-        contraseña.setText("jPasswordField1");
+        contraseña.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                contraseñaKeyTyped(evt);
+            }
+        });
         paneldatos.add(contraseña, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 210, 130, -1));
 
-        cocontraseña.setText("jPasswordField1");
         cocontraseña.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 cocontraseñaFocusLost(evt);
             }
         });
+        cocontraseña.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                cocontraseñaKeyTyped(evt);
+            }
+        });
         paneldatos.add(cocontraseña, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 260, 130, -1));
 
         correcto.setText("Disponible");
-        paneldatos.add(correcto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 300, 100, -1));
-
-        jPanel2.setBackground(new java.awt.Color(20, 28, 225));
-        jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jPanel2.setForeground(new java.awt.Color(64, 199, 243));
-
-        Admin.setText("Usuario");
-        Admin.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                AdminActionPerformed(evt);
-            }
-        });
-
-        jLabel13.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel13.setText("Autorizacion");
-
-        pw.setText("**************");
-        pw.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                pwFocusGained(evt);
-            }
-        });
+        paneldatos.add(correcto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 300, 180, -1));
 
         guardar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconoso/icons8-guardar-como-100.png"))); // NOI18N
         guardar.setContentAreaFilled(false);
@@ -212,44 +217,10 @@ public class agregaremple extends javax.swing.JFrame {
                 guardarActionPerformed(evt);
             }
         });
+        paneldatos.add(guardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 220, 115, -1));
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(Admin, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pw, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(guardar, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel13)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(Admin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pw, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(25, 25, 25)
-                        .addComponent(guardar)))
-                .addContainerGap(31, Short.MAX_VALUE))
-        );
-
-        paneldatos.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(355, 136, -1, -1));
+        dpiregis.setText("jLabel3");
+        paneldatos.add(dpiregis, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 120, -1, -1));
 
         jPanel1.add(paneldatos, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 620, 370));
 
@@ -266,10 +237,44 @@ public class agregaremple extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+        private Boolean construir() {
+        LoginView n = new LoginView(null, true);
+        new LoginController(n);
+        n.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent we) {
+                System.exit(0);
+            }
+        });
+        n.pack();
+        n.setLocationRelativeTo(null);
 
+        n.setVisible(true);
+        idUsuario = n.getRol();
+        if (idUsuario.equals("")) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private Boolean DPIDis() {
+        Boolean valor = true;
+        try {
+            Statement sx = Consulta.createStatement();
+            ResultSet Ca = sx.executeQuery("SELECT id from Usuarios where DPI='"+dpi.getText()+"'");
+            while(Ca.next())
+            {
+                valor=false;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(agregaremple.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return valor;
+    }
     private void guardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarActionPerformed
         // TODO add your handling code here:
-        if(aut())
+        if(construir())
         {
             if (disponible==false || nombre.getText().equals("") || apellido.getText().equals("") || dpi.getText().equals("")
                 || usuario.getText().equals("")|| contraseña.getText().equals(""))
@@ -279,7 +284,7 @@ public class agregaremple extends javax.swing.JFrame {
             }
             else
             {
-                if(Diponible.getText().equals("No Disponible")!=true&&correcto.getText().equals("No Coincide")!=true)
+                if(Diponible.getText().equals("No Disponible")!=true&&correcto.getText().equals("No Coincide")!=true&&DPIDis()==true)
                 {
                     try
                     {
@@ -327,15 +332,21 @@ public class agregaremple extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_guardarActionPerformed
 
-    private void AdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AdminActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_AdminActionPerformed
-
     private void cocontraseñaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_cocontraseñaFocusLost
         if(Dipo2())
         {
-            correcto.setVisible(true);
-            correcto.setText("Coincide");
+            if(contraseña.getText().equals("")||cocontraseña.getText().equals(""))
+            {
+                correcto.setVisible(true);
+                correcto.setText("Confirme Su Contraseña");
+            }
+            else
+            {
+                correcto.setVisible(true);
+                correcto.setText("Coincide");
+            }
+                 
+            
         }
         else
         {
@@ -354,9 +365,19 @@ public class agregaremple extends javax.swing.JFrame {
 
         if(Dipo())
         {
-            Diponible.setVisible(true);
-            Diponible.setText("Disponible");
+            
+            if(usuario.getText().equals(""))
+            {
+                Diponible.setVisible(true);
+                Diponible.setText("Ingrese Usuario");
+            }
+            else
+            {
+                Diponible.setVisible(true);
+                Diponible.setText("Disponible");
+            }
         }
+        
         else
         {
             Diponible.setText("No Disponible");
@@ -366,37 +387,124 @@ public class agregaremple extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_usuarioFocusLost
 
-    private void pwFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_pwFocusGained
-        pw.setText("");
-        // TODO add your handling code here:
-    }//GEN-LAST:event_pwFocusGained
-
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
             rh r=new rh();
             r.setVisible(true);
             dispose();
         // TODO add your handling code here:
     }//GEN-LAST:event_formWindowClosing
-    private Boolean aut()
-    {
-        Boolean valor=false;
-        try {
-            String us = Admin.getText();
-            
-            char claves[]=pw.getPassword();
-            String clavedef=new String(claves);
-            Statement sx = Consulta.createStatement();
-            ResultSet Ca = sx.executeQuery("SELECT id from Usuarios where Usuario='"+us+"' && Contraseña='"+clavedef+"'");
-            while(Ca.next())
-            {
-                valor=true;
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(agregaremple.class.getName()).log(Level.SEVERE, null, ex);
+
+    private void dpiFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_dpiFocusLost
+        if(DPIDis()==false)
+        {
+            dpiregis.setVisible(true);
+            dpiregis.setText("DPI ya registrado");
         }
-        return valor;
-    }        
-            
+        else
+        {
+            dpiregis.setVisible(false);
+        }
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dpiFocusLost
+
+    private void nombreKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nombreKeyTyped
+        int k = (int) evt.getKeyChar();
+        if (k == 10) {
+            apellido.requestFocus();
+        }
+            // TODO add your handling code here:
+    }//GEN-LAST:event_nombreKeyTyped
+
+    private void apellidoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_apellidoKeyTyped
+int k = (int) evt.getKeyChar();
+        if (k == 10) {
+            dpi.requestFocus();
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_apellidoKeyTyped
+
+    private void dpiKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_dpiKeyTyped
+int k = (int) evt.getKeyChar();
+        if (k == 10) {
+            usuario.requestFocus();
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_dpiKeyTyped
+
+    private void usuarioKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_usuarioKeyTyped
+int k = (int) evt.getKeyChar();
+        if (k == 10) {
+            contraseña.requestFocus();
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_usuarioKeyTyped
+
+    private void contraseñaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_contraseñaKeyTyped
+int k = (int) evt.getKeyChar();
+        if (k == 10) {
+            cocontraseña.requestFocus();
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_contraseñaKeyTyped
+
+    private void cocontraseñaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cocontraseñaKeyTyped
+        int k = (int) evt.getKeyChar();
+        if (k == 10) {
+              if(construir())
+        {
+            if (disponible==false || nombre.getText().equals("") || apellido.getText().equals("") || dpi.getText().equals("")
+                || usuario.getText().equals("")|| contraseña.getText().equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Revise que todos los campos esten llenos");
+
+            }
+            else
+            {
+                if(Diponible.getText().equals("No Disponible")!=true&&correcto.getText().equals("No Coincide")!=true&&DPIDis()==true)
+                {
+                    try
+                    {
+                        PreparedStatement CrearEm = cn.prepareStatement("INSERT INTO Usuarios(Nombre,Apellido,Usuario,Contraseña,DPI,Privilegios) "
+                            + "VALUES(?,?,?,?,?,?)");
+                        CrearEm.setString(1, nombre.getText());
+                        CrearEm.setString(2, apellido.getText());
+                        CrearEm.setString(3,usuario.getText());
+                        CrearEm.setString(4,contraseña.getText());
+                        CrearEm.setString(5,dpi.getText());
+                        CrearEm.setString(6,boxpuesto.getSelectedItem().toString());//puesto
+                        CrearEm.executeUpdate();
+                        CrearEm.close();
+                        JOptionPane.showMessageDialog(null, "Nuevo empleado Agregado");
+                    }
+                    catch (SQLException ex)
+                    {
+                        Logger.getLogger(IngresarProve.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    rh x=new rh();
+                    x.setVisible(true);
+                    dispose();
+                }
+                else
+                {
+                    if(Diponible.getText().equals("No Disponible"))
+                    {
+                        JOptionPane.showMessageDialog(null, "Cambie de usuario");
+
+                    }
+                    if(correcto.getText().equals("No Coincide"))
+                    {
+                        JOptionPane.showMessageDialog(null, "Confirme su contraseña");
+
+                    }
+
+                }
+            }
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(null, "Acceso Denegado");
+
+        }
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_cocontraseñaKeyTyped
+        
         
         private Boolean Dipo2()
     {
@@ -459,7 +567,6 @@ public class agregaremple extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField Admin;
     private javax.swing.JLabel Confirmar;
     private javax.swing.JLabel Diponible;
     private javax.swing.JTextField apellido;
@@ -468,19 +575,17 @@ public class agregaremple extends javax.swing.JFrame {
     private javax.swing.JPasswordField contraseña;
     private javax.swing.JLabel correcto;
     private javax.swing.JTextField dpi;
+    private javax.swing.JLabel dpiregis;
     private javax.swing.JButton guardar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JTextField nombre;
     private javax.swing.JPanel paneldatos;
-    private javax.swing.JPasswordField pw;
     private javax.swing.JTextField usuario;
     // End of variables declaration//GEN-END:variables
 }

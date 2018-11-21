@@ -44,6 +44,8 @@ public class verprove extends javax.swing.JFrame {
         };
         PanelEditar.setVisible(false);
         this.setTitle("Proveedores - Sistema Inventario BTZ");
+         this.setLocationRelativeTo(null);        
+
         modelo.addColumn("Nit");
         modelo.addColumn("Empresa");
         modelo.addColumn("Representante");

@@ -36,9 +36,9 @@ Conexion con = new Conexion();
         initComponents();
         this.setTitle("Login");
         this.setResizable(false);
-
+        this.setLocationRelativeTo(null);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();    
-        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+       // this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         
     }
 
@@ -118,7 +118,9 @@ Conexion con = new Conexion();
 
     private void ingresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ingresarActionPerformed
         log_sig x =new log_sig();
+        
         x.setVisible(true);
+        
         dispose();
 // TODO add your handling code here:
         
